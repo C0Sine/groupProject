@@ -14,7 +14,7 @@ tick = 0
 def colorChange():
     global tick
     if tick == FPS:
-        tick = 0
+        tick = 1
         DISPLAYSURF.fill((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
     else:
         tick += 1
