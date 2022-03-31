@@ -11,6 +11,14 @@ FPS = 60
 tick = 0
 linetick = 0
 
+
+
+
+
+
+
+
+
 def drawCircle(radius,x,y,color):
     global tick
     if tick == FPS:
