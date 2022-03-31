@@ -11,6 +11,10 @@ FPS = 60
 tick = 0
 
 
+def getRect():
+    return pygame.Rect((50, 50, 50, 50))
+
+
 def colorChange():
     global tick
     if tick == FPS:
@@ -27,5 +31,8 @@ while True:
             pygame.quit()
             print('l8r sk8r')
             sys.exit()
+
+    pygame.draw.rect(DISPLAYSURF, (0, 0, 0), getRect())
+
     pygame.display.update()
     fpsClock.tick(FPS)
