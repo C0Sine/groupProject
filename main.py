@@ -11,7 +11,12 @@ FPS = 60
 tick = 0
 
 def drawCircle(radius,x,y,color):
-    pygame.draw.circle(DISPLAYSURF,color,(x,y),radius)
+    global tick
+    if tick == FPS:
+        tick = 0
+        pygame.draw.circle(DISPLAYSURF,color,(x,y),radius)
+    else:
+        tick += 1
 def colorChange():
     global tick
     if tick == FPS:
@@ -22,7 +27,7 @@ def colorChange():
 
 
 while True:
-    drawCircle(50,400,400,(25,118,200))
+    drawCircle(random.randint(10, 50), random.randint(0, 800), random.randint(0, 800),(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
     colorChange()
     for event in pygame.event.get():
         if event.type == QUIT:
