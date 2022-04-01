@@ -17,8 +17,17 @@ def drawRect(pos):
     pygame.draw.rect(DISPLAYSURF, (0, 0, 0), (pos[0], pos[1], 50, 50))
 
 
-def drawCircle(radius, x, y, color):
+
+
+
+
+
+def drawCircle(radius,x,y,color,keyHit):
+
+
     global circleTick
+    if keyHit:
+        pygame.draw.circle(DISPLAYSURF, color, (x, y), radius)
     if circleTick == FPS:
         circleTick = 0
         pygame.draw.circle(DISPLAYSURF, color, (x, y), radius)
@@ -49,8 +58,7 @@ def drawLine():
 
 while True:
     colorChange()
-    drawCircle(random.randint(0, 50), random.randint(0, 800), random.randint(0, 800),
-               (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
+    drawCircle(random.randint(50, 100), random.randint(0, 800), random.randint(0, 800),(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),False)
     drawLine()
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -60,12 +68,11 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
                 drawRect([random.randint(0, 750), random.randint(0, 750)])
+            if event.key == pygame.K_c:
+                drawCircle(random.randint(50, 100), random.randint(0, 800), random.randint(0, 800),(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),True)
             if event.key == pygame.K_l:
                 for i in range(0, 1000):
-                    pygame.draw.line(DISPLAYSURF, (0, 0, 0), (
-                    random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())), (
-                                     random.randint(0, DISPLAYSURF.get_width()),
-                                     random.randint(0, DISPLAYSURF.get_height())))
+                    pygame.draw.line(DISPLAYSURF, (0, 0, 0), (random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())), (random.randint(0, DISPLAYSURF.get_width()),random.randint(0, DISPLAYSURF.get_height())))
 
     pygame.display.update()
     fpsClock.tick(FPS)
