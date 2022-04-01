@@ -42,7 +42,7 @@ def drawLine():
     if linetick == FPS:
         linetick = 1
         pygame.draw.line(DISPLAYSURF, (0, 0, 0), (random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())), (random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())))
-        print("lol")
+        print("lolo")
     else:
         linetick += 1
 
