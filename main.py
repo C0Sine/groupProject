@@ -48,6 +48,7 @@ def drawLine():
 
 
 while True:
+    drawCircle(random.randint(0,50),random.randint(0,800),random.randint(0,800),(random.randint(0,255),random.randint(0,255),random.randint(0,255)))
     colorChange()
     drawLine()
     for event in pygame.event.get():
@@ -55,6 +56,5 @@ while True:
             pygame.quit()
             print('l8r sk8r')
             sys.exit()
-
     pygame.display.update()
     fpsClock.tick(FPS)
