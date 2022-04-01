@@ -10,23 +10,22 @@ FPS = 60
 
 tick = 0
 linetick = 0
-circleTick=30
+circleTick = 30
+
 
 def drawRect(pos):
     pygame.draw.rect(DISPLAYSURF, (0, 0, 0), (pos[0], pos[1], 50, 50))
 
 
-
-
-
-
-def drawCircle(radius,x,y,color):
+def drawCircle(radius, x, y, color):
     global circleTick
     if circleTick == FPS:
         circleTick = 0
-        pygame.draw.circle(DISPLAYSURF,color,(x,y),radius)
+        pygame.draw.circle(DISPLAYSURF, color, (x, y), radius)
     else:
         circleTick += 1
+
+
 def colorChange():
     global tick
     if tick == FPS:
@@ -41,15 +40,17 @@ def drawLine():
     global linetick
     if linetick == FPS:
         linetick = 60
-        pygame.draw.line(DISPLAYSURF, (0, 0, 0), (random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())), (random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())))
-        print("lol")
+        pygame.draw.line(DISPLAYSURF, (0, 0, 0),
+                         (random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())),
+                         (random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())))
     else:
         linetick += 1
 
 
 while True:
     colorChange()
-    drawCircle(random.randint(0, 50), random.randint(0, 800), random.randint(0, 800),(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
+    drawCircle(random.randint(0, 50), random.randint(0, 800), random.randint(0, 800),
+               (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
     drawLine()
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -61,9 +62,9 @@ while True:
                 drawRect([random.randint(0, 750), random.randint(0, 750)])
             if event.key == pygame.K_l:
                 pygame.draw.line(DISPLAYSURF, (0, 0, 0), (
-                random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())), (
-                                 random.randint(0, DISPLAYSURF.get_width()),
-                                 random.randint(0, DISPLAYSURF.get_height())))
+                    random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())), (
+                                     random.randint(0, DISPLAYSURF.get_width()),
+                                     random.randint(0, DISPLAYSURF.get_height())))
 
     pygame.display.update()
     fpsClock.tick(FPS)
