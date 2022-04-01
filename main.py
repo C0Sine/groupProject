@@ -40,7 +40,7 @@ def colorChange():
 def drawLine():
     global linetick
     if linetick == FPS:
-        linetick = 1
+        linetick = 60
         pygame.draw.line(DISPLAYSURF, (0, 0, 0), (random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())), (random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())))
         print("lol")
     else:
