@@ -56,5 +56,14 @@ while True:
             pygame.quit()
             print('l8r sk8r')
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                drawRect([random.randint(0, 750), random.randint(0, 750)])
+            if event.key == pygame.K_l:
+                pygame.draw.line(DISPLAYSURF, (0, 0, 0), (
+                random.randint(0, DISPLAYSURF.get_width()), random.randint(0, DISPLAYSURF.get_height())), (
+                                 random.randint(0, DISPLAYSURF.get_width()),
+                                 random.randint(0, DISPLAYSURF.get_height())))
+
     pygame.display.update()
     fpsClock.tick(FPS)
