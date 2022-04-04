@@ -11,6 +11,7 @@ FPS = 60
 tick = 0
 linetick = 0
 circleTick = 30
+triangleTick = 0
 
 
 def drawRect(pos):
@@ -33,6 +34,18 @@ def drawCircle(radius,x,y,color,keyHit):
         pygame.draw.circle(DISPLAYSURF, color, (x, y), radius)
     else:
         circleTick += 1
+
+def drawTriangle(x,y,color,keyHit):
+
+
+    global triangleTick
+    if keyHit:
+        pygame.draw.polygon(DISPLAYSURF, color, [(x,y), (x + 50, y + 50), (x + 100, y)])
+    if triangleTick == FPS:
+        triangleTick = 0
+        pygame.draw.polygon(DISPLAYSURF, color, [(x,y), (x + 50, y + 50), (x + 100, y)])
+    else:
+        triangleTick += 1
 
 
 def colorChange():
@@ -68,6 +81,8 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
                 drawRect([random.randint(0, 750), random.randint(0, 750)])
+            if event.key == pygame.K_t:
+                drawTriangle(random.randint(0, 750), random.randint(0, 750), (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), True)
             if event.key == pygame.K_c:
                 drawCircle(random.randint(50, 100), random.randint(0, 800), random.randint(0, 800),(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),True)
             if event.key == pygame.K_l:
