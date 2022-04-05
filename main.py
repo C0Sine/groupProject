@@ -16,6 +16,7 @@ class Map(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
+        self.image.set_colorkey((255, 255, 255))
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.mask.get_rect()
 
@@ -71,8 +72,10 @@ while True:
     if keyboard.is_pressed('w') or keyboard.is_pressed('Up'):
         player.updatePosition(0, -5)
 
-    if pygame.sprite.collide_mask(player, weirdWall):
+    if pygame.sprite.collide_mask(player, testMap):
         player.updatePosition(0, 0)
+        print(str(testMap.mask.get_rect()) + "MASK RECT")
+        print(str(testMap.image.get_rect()) + "IMAGE RECT")
         print("PEEOPLE")
 
 
