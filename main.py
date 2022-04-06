@@ -35,6 +35,15 @@ class WallTest(pygame.sprite.Sprite):
 weirdWall = WallTest()
 weirdWall.rect.x, weirdWall.rect.y = 100, 100
 
+class LightSource():
+    def __init__(self,location,direction,width,strength):
+        #direction and width in radians
+        self.location=location
+        self.direction=direction
+        self.width=width
+        self.strength=strength
+    #def makeLayer(self):
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
