@@ -9,9 +9,6 @@ surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
 fpsClock = pygame.time.Clock()
 FPS = 60
 
-# maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
-# mask = pygame.mask.from_surface(maskimage)
-
 
 class Map(pygame.sprite.Sprite):
     def __init__(self):
@@ -20,9 +17,29 @@ class Map(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.mask.get_rect()
 
+    def loadMap(self, file):    # takes text file of map
+        with open(file) as ins:
+            arr = []
+            for line in ins:    # creates an array based on the text file
+                number_strings = line.split()
+                numbers = [n for n in number_strings]
+                arr.append(numbers)
+        tempsurf = pygame.Surface((len(arr[0]) * 25, len(arr) * 25))    # surface for walls
+        tempsurf.fill((255, 255, 255))  # whitespace will be non-collideable
+        for i in range(0, len(arr)):    # parses array to create walls on tempsurf
+            for j in range(0, len(arr[0])):
+                if arr[i][j] == 'x':    # x is used to assign a wall, any other character works for empty space
+                    pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
+        tempsurf.set_colorkey((255, 255, 255))  # sets white to transparent, allowing movement in those areas
+        self.image = tempsurf   # sets map to the loaded map
+        self.mask = pygame.mask.from_surface(tempsurf)
+        self.rect = self.mask.get_rect()
+
+
 
 testMap = Map()
 
+testMap.loadMap('map1.txt')
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
@@ -59,7 +76,7 @@ class Player(pygame.sprite.Sprite):
 player = Player()
 fakePlayer = Player()
 # Fake player is an invisible "Player" used to detect collisions
-player.rect.x, player.rect.y = 300, 300
+player.rect.x, player.rect.y = 100, 100
 
 while True:
     surface.fill((255, 255, 255))
@@ -80,28 +97,27 @@ while True:
     if keyboard.is_pressed('w') or keyboard.is_pressed('Up'):
         player.updatePosition(0, -5)
 
-    if pygame.sprite.collide_mask(player, testMap) or pygame.sprite.collide_mask(player, weirdWall):
+    if pygame.sprite.collide_mask(player, testMap):
         # Takes the fake player and, using the oldX or oldY, checks to see if it can move in the opposite direction
         # For example, if it takes oldY, it will check to see if it could move left or right from the original position
         # Any instance of which it would collide, returns it to the original X or Y, independently, allowing for diagonal movement
         fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x - 5, player.oldY
-        if pygame.sprite.collide_mask(fakePlayer, testMap) or pygame.sprite.collide_mask(fakePlayer, weirdWall):
+        if pygame.sprite.collide_mask(fakePlayer, testMap):
             player.rect.x = player.oldX
 
         fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x + 5, player.oldY
-        if pygame.sprite.collide_mask(fakePlayer, testMap) or pygame.sprite.collide_mask(fakePlayer, weirdWall):
+        if pygame.sprite.collide_mask(fakePlayer, testMap):
             player.rect.x = player.oldX
 
         fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y - 5
-        if pygame.sprite.collide_mask(fakePlayer, testMap) or pygame.sprite.collide_mask(fakePlayer, weirdWall):
+        if pygame.sprite.collide_mask(fakePlayer, testMap):
             player.rect.y = player.oldY
 
         fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y + 5
-        if pygame.sprite.collide_mask(fakePlayer, testMap) or pygame.sprite.collide_mask(fakePlayer, weirdWall):
+        if pygame.sprite.collide_mask(fakePlayer, testMap):
             player.rect.y = player.oldY
 
-    surface.blit(testMap.image, testMap.rect)
+    surface.blit(testMap.image, (0, 0))
     surface.blit(player.image, player.rect)
-    surface.blit(weirdWall.image, weirdWall.rect)
     pygame.display.update()
     fpsClock.tick(FPS)
