@@ -69,6 +69,15 @@ class Player(pygame.sprite.Sprite):
         self.rect.x += xDif
         self.rect.y += yDif
 
+    def updateCollisionPosition(self, direction):
+        if direction == 'Left':
+            self.rect.x += self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().width - 35
+        if direction == 'Right':
+            self.rect.x -= self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().width - 35
+        if direction == 'Down':
+            self.rect.y -= self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().height - 35
+        if direction == 'Up':
+            self.rect.y += self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().height - 35
     # def updateSelf(self):
     #     self.rect = pygame.image.
 
@@ -90,32 +99,40 @@ while True:
 
     if keyboard.is_pressed('a') or keyboard.is_pressed('Left'):
         player.updatePosition(-5, 0)
+        if pygame.sprite.collide_mask(player, testMap):
+            player.updateCollisionPosition('Left')
     if keyboard.is_pressed('d') or keyboard.is_pressed('Right'):
         player.updatePosition(5, 0)
+        if pygame.sprite.collide_mask(player, testMap):
+            player.updateCollisionPosition('Right')
     if keyboard.is_pressed('s') or keyboard.is_pressed('Down'):
         player.updatePosition(0, 5)
+        if pygame.sprite.collide_mask(player, testMap):
+            player.updateCollisionPosition('Down')
     if keyboard.is_pressed('w') or keyboard.is_pressed('Up'):
         player.updatePosition(0, -5)
+        if pygame.sprite.collide_mask(player, testMap):
+            player.updateCollisionPosition('Up')
 
-    if pygame.sprite.collide_mask(player, testMap):
-        # Takes the fake player and, using the oldX or oldY, checks to see if it can move in the opposite direction
-        # For example, if it takes oldY, it will check to see if it could move left or right from the original position
-        # Any instance of which it would collide, returns it to the original X or Y, independently, allowing for diagonal movement
-        fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x - 5, player.oldY
-        if pygame.sprite.collide_mask(fakePlayer, testMap):
-            player.rect.x = player.oldX
-
-        fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x + 5, player.oldY
-        if pygame.sprite.collide_mask(fakePlayer, testMap):
-            player.rect.x = player.oldX
-
-        fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y - 5
-        if pygame.sprite.collide_mask(fakePlayer, testMap):
-            player.rect.y = player.oldY
-
-        fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y + 5
-        if pygame.sprite.collide_mask(fakePlayer, testMap):
-            player.rect.y = player.oldY
+    # if pygame.sprite.collide_mask(player, testMap):
+    #     # Takes the fake player and, using the oldX or oldY, checks to see if it can move in the opposite direction
+    #     # For example, if it takes oldY, it will check to see if it could move left or right from the original position
+    #     # Any instance of which it would collide, returns it to the original X or Y, independently, allowing for diagonal movement
+    #     fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x - 5, player.oldY
+    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
+    #         player.rect.x = player.oldX
+    #
+    #     fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x + 5, player.oldY
+    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
+    #         player.rect.x = player.oldX
+    #
+    #     fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y - 5
+    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
+    #         player.rect.y = player.oldY
+    #
+    #     fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y + 5
+    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
+    #         player.rect.y = player.oldY
 
     surface.blit(testMap.image, (0, 0))
     surface.blit(player.image, player.rect)
