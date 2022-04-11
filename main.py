@@ -66,7 +66,7 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         # Create a player mask from a given sprite
-        self.image = pygame.image.load('datBoi.png')
+        self.image = pygame.transform.scale(pygame.image.load('datBoi.png'), (50, 50))
         self.mask = pygame.mask.from_surface(self.image)
         self.oldX, self.oldY = 0, 0
         self.rect = self.image.get_rect()
@@ -79,14 +79,16 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += yDif
 
     def updateCollisionPosition(self, direction):
-        if direction == 'Left':
-            self.rect.x += self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().width - 35
-        if direction == 'Right':
-            self.rect.x -= self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().width - 35
-        if direction == 'Down':
-            self.rect.y -= self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().height - 35
-        if direction == 'Up':
-            self.rect.y += self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().height - 35
+        offset = (self.rect.x - testMap.rect.x, self.rect.y - testMap.rect.y)
+        while pygame.sprite.collide_mask(self, testMap):
+            if direction.__contains__('Left'):
+                self.rect.x += self.mask.overlap_mask(testMap.mask, offset).get_rect().width - self.rect.width + 1
+            if direction.__contains__('Right'):
+                self.rect.x -= self.mask.overlap_mask(testMap.mask, offset).get_rect().width - self.rect.width + 1
+            if direction.__contains__('Down'):
+                self.rect.y -= self.mask.overlap_mask(testMap.mask, offset).get_rect().height - self.rect.width + 1
+            if direction.__contains__('Up'):
+                self.rect.y += self.mask.overlap_mask(testMap.mask, offset).get_rect().height - self.rect.width + 1
     # def updateSelf(self):
     #     self.rect = pygame.image.
 
@@ -95,6 +97,7 @@ player = Player()
 fakePlayer = Player()
 # Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
+playerspeed = 3
 
 while True:
     surface.fill((255, 255, 255))
@@ -106,22 +109,52 @@ while True:
             print('l8r sk8r')
             sys.exit()
 
-    if keyboard.is_pressed('a') or keyboard.is_pressed('Left'):
-        player.updatePosition(-5, 0)
-        if pygame.sprite.collide_mask(player, testMap):
-            player.updateCollisionPosition('Left')
-    if keyboard.is_pressed('d') or keyboard.is_pressed('Right'):
-        player.updatePosition(5, 0)
-        if pygame.sprite.collide_mask(player, testMap):
-            player.updateCollisionPosition('Right')
-    if keyboard.is_pressed('s') or keyboard.is_pressed('Down'):
-        player.updatePosition(0, 5)
-        if pygame.sprite.collide_mask(player, testMap):
-            player.updateCollisionPosition('Down')
-    if keyboard.is_pressed('w') or keyboard.is_pressed('Up'):
-        player.updatePosition(0, -5)
-        if pygame.sprite.collide_mask(player, testMap):
-            player.updateCollisionPosition('Up')
+    if True:    # Movement
+        if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
+            player.updatePosition(0 - round(playerspeed * 0.707), 0)
+            if pygame.sprite.collide_mask(player, testMap):
+                player.updateCollisionPosition('Left')
+            player.updatePosition(0, 0 - round(playerspeed * 0.707))
+            if pygame.sprite.collide_mask(player, testMap):
+                player.updateCollisionPosition('Up')
+        elif (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('s') or keyboard.is_pressed('Down')):  # Diagonal movement
+            player.updatePosition(0 - round(playerspeed * 0.707), 0)
+            if pygame.sprite.collide_mask(player, testMap):
+                player.updateCollisionPosition('Left')
+            player.updatePosition(0, playerspeed * 0.707)
+            if pygame.sprite.collide_mask(player, testMap):
+                player.updateCollisionPosition('Down')
+        elif (keyboard.is_pressed('d') or keyboard.is_pressed('Right')) and (keyboard.is_pressed('s') or keyboard.is_pressed('Down')):  # Diagonal movement
+            player.updatePosition(playerspeed * 0.707, 0)
+            if pygame.sprite.collide_mask(player, testMap):
+                player.updateCollisionPosition('Right')
+            player.updatePosition(0, playerspeed * 0.707)
+            if pygame.sprite.collide_mask(player, testMap):
+                player.updateCollisionPosition('Down')
+        elif (keyboard.is_pressed('d') or keyboard.is_pressed('Right')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):  # Diagonal movement
+            player.updatePosition(playerspeed * 0.707, 0)
+            if pygame.sprite.collide_mask(player, testMap):
+                player.updateCollisionPosition('Right')
+            player.updatePosition(0, 0 - round(playerspeed * 0.707))
+            if pygame.sprite.collide_mask(player, testMap):
+                player.updateCollisionPosition('Up')
+        else:
+            if keyboard.is_pressed('a') or keyboard.is_pressed('Left'):  # Cardinal movement
+                player.updatePosition(-playerspeed, 0)
+                if pygame.sprite.collide_mask(player, testMap):
+                    player.updateCollisionPosition('Left')
+            if keyboard.is_pressed('d') or keyboard.is_pressed('Right'):    # Cardinal movement
+                player.updatePosition(playerspeed, 0)
+                if pygame.sprite.collide_mask(player, testMap):
+                    player.updateCollisionPosition('Right')
+            if keyboard.is_pressed('s') or keyboard.is_pressed('Down'):  # Cardinal movement
+                player.updatePosition(0, playerspeed)
+                if pygame.sprite.collide_mask(player, testMap):
+                    player.updateCollisionPosition('Down')
+            if keyboard.is_pressed('w') or keyboard.is_pressed('Up'):   # Cardinal movement
+                player.updatePosition(0, -playerspeed)
+                if pygame.sprite.collide_mask(player, testMap):
+                    player.updateCollisionPosition('Up')
 
     # if pygame.sprite.collide_mask(player, testMap):
     #     # Takes the fake player and, using the oldX or oldY, checks to see if it can move in the opposite direction
