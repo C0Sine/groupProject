@@ -36,10 +36,10 @@ class Map(pygame.sprite.Sprite):
         self.rect = self.mask.get_rect()
 
 
-
 testMap = Map()
 
 testMap.loadMap('map1.txt')
+
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
@@ -113,29 +113,54 @@ player = Player()
 class LOSBullet(pygame.sprite.Sprite):
     def __init__(self, Origin, Target):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('LOSTest.png')
+        self.image = pygame.transform.scale(pygame.image.load('LOSTest.png'), (5, 5))
         self.rect = self.image.get_rect()
-        self.mask = self.image.get_masks()
+        self.mask = pygame.mask.from_surface(self.image)
         self.origin, self.target = Origin, Target
-        self.rect.x, self.rect.y = #YOUR CODE HERE
+        self.rect.center = self.origin.rect.center
 
     def checkLOS(self):
+        self.image = pygame.transform.scale(pygame.image.load('LOSTest.png'), (7, 7))
+        self.rect.x = self.origin.rect.x + self.origin.rect.width / 2
+        self.rect.y = self.origin.rect.y + self.origin.rect.height / 2
+        moveX = int(self.target.rect.centerx - self.rect.centerx)
+        moveY = int(self.target.rect.centery - self.rect.centery)
+        #print("moveX = " + str(moveX) + ", moveY = " + str(moveY))
+        lostLOS = False
 
-        print("TOP")
-        print(self.rect.x)
-        print(self.rect.y)
-        if pygame.sprite.collide_mask(testMap, self):
-            self.color = (255, 0, 0)
-            #print("UH OH STINKY")
+        for i in range(29):
+            self.rect.centerx += moveX/29
+            self.rect.centery += moveY/29
+
+            if pygame.sprite.collide_mask(self, testMap):
+                lostLOS = True
+                self.image = pygame.transform.scale(pygame.image.load('LOSBroken.png'), (7, 7))
+
+            surface.blit(self.image, self.rect)
+
+
+        if lostLOS:
+            print("You are safe")
+            return True
         else:
-            self.color = (0, 0, 0)
-            #print("NO INTERRUPT")
-        pygame.draw.line(surface, self.color, (self.origin.rect.x + self.origin.rect.width / 2, self.origin.rect.y + self.origin.rect.height / 2),
-                         (self.target.rect.x + self.target.rect.width / 2, self.target.rect.y + self.target.rect.height / 2))
+            print("Dave can see you")
+            return False
 
 
-playerLOS = LOSLine(player, dave)
-playerLOS.rect.x, playerLOS.rect.y = 80, 80
+        # print("TOP")
+        # print(self.rect.x)
+        # print(self.rect.y)
+        # if pygame.sprite.collide_mask(testMap, self):
+        #     self.color = (255, 0, 0)
+        #     #print("UH OH STINKY")
+        # else:
+        #     self.color = (0, 0, 0)
+        #     #print("NO INTERRUPT")
+        # pygame.draw.line(surface, self.color, (self.origin.rect.x + self.origin.rect.width / 2, self.origin.rect.y + self.origin.rect.height / 2),
+        #                  (self.target.rect.x + self.target.rect.width / 2, self.target.rect.y + self.target.rect.height / 2))
+
+
+playerLOS = LOSBullet(player, dave)
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
 
