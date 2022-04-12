@@ -59,7 +59,6 @@ class LightSource():
         self.direction=direction
         self.width=width
         self.strength=strength
-    #def makeLayer(self):
 
 
 class Player(pygame.sprite.Sprite):
