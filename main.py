@@ -2,6 +2,7 @@ import keyboard as keyboard
 import pygame
 import random
 import sys
+import math
 
 from pygame import QUIT
 
@@ -36,12 +37,40 @@ weirdWall = WallTest()
 weirdWall.rect.x, weirdWall.rect.y = 100, 100
 
 class LightSource():
-    def __init__(self,location,direction,width,strength):
-        #direction and width in radians
-        self.location=location
-        self.direction=direction
-        self.width=width
-        self.strength=strength
+    def __init__(self, location, direction, width, strength):
+        # direction and width in degrees
+
+        self.location = location
+        self.direction = direction
+        self.width = width
+        self.strength = strength
+        self.points = []
+
+    def calculateLights(self):
+
+        for angle in range(self.direction, self.direction + self.width):
+            point, lastLocation = [], []
+            len = 1
+            while point == []:
+
+                lastLocation[0], lastLocation[1] = point[0], point[1]
+                point = [self.location[0] + math.cos(angle), self.location[1] * math.cos(angle)]
+
+                if pygame.sprite.collide_mask(pygame.draw.line((0, 255, 255), (self.location[0], self.location[1]), (self.location[0], self.location[1]), (self.location[0] + math.cos(angle), self.location[1] * math.cos(angle))), testMap):
+                    self.points.append(lastLocation)
+
+                else:  # Increment Len
+                    len += 1
+
+
+    def drawLights(self):
+        pygame.draw.line((0, 255, 255), (self.location[0], self.location[1]), (self.location[0], self.location[1]),
+                          (self.points[0][0], self.points[0][1]))
+        pygame.draw.line((0, 255, 255), (self.location[0], self.location[1]), (self.location[0], self.location[1]),
+                         (self.points[len(self.points) - 1][0], self.points[len(self.points) - 1][1]))
+
+        #loop through points and draw lines between the ones that follow each other in the array
+
     #def makeLayer(self):
 
 
