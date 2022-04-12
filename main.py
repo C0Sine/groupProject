@@ -83,16 +83,67 @@ class Player(pygame.sprite.Sprite):
     # def updateSelf(self):
     #     self.rect = pygame.image.
 
+    def createLOSLine(self, Target):
+        LOSLine = pygame.draw.line(surface, (0, 0, 0), (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+        #pygame.draw.line(surface, (0, 0, 0), (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+        if LOSLine.colliderect(Target):
+            LOSLine = pygame.draw.line(surface, (0, 255, 0), (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+        # else: LOSLine = pygame.draw.line(surface, (0, 255, 0), (self.rect.x + self.rect.width / 2, self.rect.y +
+        # self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+
+
+
+
+
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.transform.scale(pygame.image.load('dave.jpg'), (40, 40))
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect()
+
+
+dave = Enemy()
+dave.rect.x, dave.rect.y = 200, 200
 
 player = Player()
-fakePlayer = Player()
-# Fake player is an invisible "Player" used to detect collisions
+
+
+class LOSBullet(pygame.sprite.Sprite):
+    def __init__(self, Origin, Target):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('LOSTest.png')
+        self.rect = self.image.get_rect()
+        self.mask = self.image.get_masks()
+        self.origin, self.target = Origin, Target
+        self.rect.x, self.rect.y = #YOUR CODE HERE
+
+    def checkLOS(self):
+
+        print("TOP")
+        print(self.rect.x)
+        print(self.rect.y)
+        if pygame.sprite.collide_mask(testMap, self):
+            self.color = (255, 0, 0)
+            #print("UH OH STINKY")
+        else:
+            self.color = (0, 0, 0)
+            #print("NO INTERRUPT")
+        pygame.draw.line(surface, self.color, (self.origin.rect.x + self.origin.rect.width / 2, self.origin.rect.y + self.origin.rect.height / 2),
+                         (self.target.rect.x + self.target.rect.width / 2, self.target.rect.y + self.target.rect.height / 2))
+
+
+playerLOS = LOSLine(player, dave)
+playerLOS.rect.x, playerLOS.rect.y = 80, 80
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
 
 while True:
     surface.fill((255, 255, 255))
     player.oldX, player.oldY = player.rect[0], player.rect[1]
+
+    playerLOS.checkLOS()
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -147,27 +198,8 @@ while True:
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Up')
 
-    # if pygame.sprite.collide_mask(player, testMap):
-    #     # Takes the fake player and, using the oldX or oldY, checks to see if it can move in the opposite direction
-    #     # For example, if it takes oldY, it will check to see if it could move left or right from the original position
-    #     # Any instance of which it would collide, returns it to the original X or Y, independently, allowing for diagonal movement
-    #     fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x - 5, player.oldY
-    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
-    #         player.rect.x = player.oldX
-    #
-    #     fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x + 5, player.oldY
-    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
-    #         player.rect.x = player.oldX
-    #
-    #     fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y - 5
-    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
-    #         player.rect.y = player.oldY
-    #
-    #     fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y + 5
-    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
-    #         player.rect.y = player.oldY
-
-    surface.blit(testMap.image, (0, 0))
+    surface.blit(testMap.image, testMap.rect)
+    surface.blit(dave.image, dave.rect)
     surface.blit(player.image, player.rect)
     pygame.display.update()
     fpsClock.tick(FPS)
