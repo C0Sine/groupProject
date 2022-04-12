@@ -13,7 +13,7 @@ FPS = 60
 class Map(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
+        self.image = pygame.transform.scale(pygame.image.load('wallTest.png'), (800, 800))
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.mask.get_rect()
 
@@ -57,9 +57,9 @@ class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         # Create a player mask from a given sprite
-        self.image = pygame.transform.scale(pygame.image.load('datBoi.png'), (50, 50))
-        self.mask = pygame.mask.from_surface(self.image)
-        self.oldX, self.oldY = 0, 0
+        self.image = pygame.transform.scale(pygame.image.load('player.png'), (40, 40))
+        self.hitbox = pygame.transform.scale(pygame.image.load('hitbox.png'), (40, 40))
+        self.mask = pygame.mask.from_surface(self.hitbox)
         self.rect = self.image.get_rect()
         # X and Y position variables for player movement
         self.posX, self.posY = 300, 300
@@ -89,10 +89,10 @@ fakePlayer = Player()
 # Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
-
+frame = 0
 while True:
+    frame += 1
     surface.fill((255, 255, 255))
-    player.oldX, player.oldY = player.rect[0], player.rect[1]
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -147,27 +147,7 @@ while True:
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Up')
 
-    # if pygame.sprite.collide_mask(player, testMap):
-    #     # Takes the fake player and, using the oldX or oldY, checks to see if it can move in the opposite direction
-    #     # For example, if it takes oldY, it will check to see if it could move left or right from the original position
-    #     # Any instance of which it would collide, returns it to the original X or Y, independently, allowing for diagonal movement
-    #     fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x - 5, player.oldY
-    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
-    #         player.rect.x = player.oldX
-    #
-    #     fakePlayer.rect.x, fakePlayer.rect.y = player.rect.x + 5, player.oldY
-    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
-    #         player.rect.x = player.oldX
-    #
-    #     fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y - 5
-    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
-    #         player.rect.y = player.oldY
-    #
-    #     fakePlayer.rect.x, fakePlayer.rect.y = player.oldX, player.rect.y + 5
-    #     if pygame.sprite.collide_mask(fakePlayer, testMap):
-    #         player.rect.y = player.oldY
-
     surface.blit(testMap.image, (0, 0))
-    surface.blit(player.image, player.rect)
+    surface.blit(pygame.transform.rotate(player.image, frame), player.rect)
     pygame.display.update()
     fpsClock.tick(FPS)
