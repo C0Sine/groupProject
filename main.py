@@ -37,7 +37,7 @@ weirdWall = WallTest()
 weirdWall.rect.x, weirdWall.rect.y = 100, 100
 
 class LightSource():
-    def __init__(self, location, direction, width, strength):
+    def __init__(self, location, direction, width, strength=None):
         # direction and width in degrees
 
         self.location = location
@@ -49,30 +49,43 @@ class LightSource():
     def calculateLights(self):
 
         for angle in range(self.direction, self.direction + self.width):
-            point, lastLocation = [], []
+            point = [-1, -1]
+            lastLocation = point
             len = 1
-            while point == []:
+            run = True
+            while run:
 
+                point = [(self.location[0] + len) * math.cos(angle), (self.location[1] + len) * math.sin(angle)]
                 lastLocation[0], lastLocation[1] = point[0], point[1]
-                point = [self.location[0] + math.cos(angle), self.location[1] * math.cos(angle)]
 
-                if pygame.sprite.collide_mask(pygame.draw.line((0, 255, 255), (self.location[0], self.location[1]), (self.location[0], self.location[1]), (self.location[0] + math.cos(angle), self.location[1] * math.cos(angle))), testMap):
+                lineSurface = pygame.Surface((800, 800))
+
+                pygame.draw.line(lineSurface, (0, 255, 255), (self.location[0], self.location[1]),
+                                 (point[0] * math.cos(angle), point[1] * math.sin(angle)))
+
+                if not pygame.mask.from_surface(lineSurface).overlap(testMap.mask, (0, 0)) == None:
                     self.points.append(lastLocation)
+                    run = False
 
                 else:  # Increment Len
                     len += 1
 
+        print(self.points)
+
 
     def drawLights(self):
-        pygame.draw.line((0, 255, 255), (self.location[0], self.location[1]), (self.location[0], self.location[1]),
+        pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
                           (self.points[0][0], self.points[0][1]))
-        pygame.draw.line((0, 255, 255), (self.location[0], self.location[1]), (self.location[0], self.location[1]),
+        pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
                          (self.points[len(self.points) - 1][0], self.points[len(self.points) - 1][1]))
 
-        #loop through points and draw lines between the ones that follow each other in the array
+        for index in range(0, len(self.points) - 2):
+            pygame.draw.line(surface, (255, 0, 0), (self.points[index][0], self.points[index][1]), (self.points[index + 1][0], self.points[index + 1][1]))
 
     #def makeLayer(self):
 
+source = LightSource([500, 500], 30, 30)
+source.calculateLights()
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -141,5 +154,6 @@ while True:
     surface.blit(testMap.image, testMap.rect)
     surface.blit(player.image, player.rect)
     surface.blit(weirdWall.image, weirdWall.rect)
+    source.drawLights()
     pygame.display.update()
     fpsClock.tick(FPS)
