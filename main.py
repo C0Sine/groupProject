@@ -50,22 +50,26 @@ class LightSource():
 
         for angle in range(self.direction, self.direction + self.width):
             point = [-1, -1]
-            lastLocation = point
+            lastLocation = [-1, -1]
+            lastLocation[0] = self.location[0]
+            lastLocation[1] = self.location[1]
             len = 1
             run = True
             while run:
 
-                point = [(self.location[0] + len) * math.cos(angle), (self.location[1] + len) * math.sin(angle)]
-                lastLocation[0], lastLocation[1] = point[0], point[1]
+                point = [(self.location[0] + len) * math.cos(math.radians(angle)), (self.location[1] + len) * math.sin(math.radians(angle))]
+                lastLocation[0] = point[0]
+                lastLocation[1] = point[1]
 
                 lineSurface = pygame.Surface((800, 800))
 
                 pygame.draw.line(lineSurface, (0, 255, 255), (self.location[0], self.location[1]),
-                                 (point[0] * math.cos(angle), point[1] * math.sin(angle)))
+                                 (point[0] * math.cos(math.radians(angle)), point[1] * math.sin(math.radians(angle))))
 
                 if not pygame.mask.from_surface(lineSurface).overlap(testMap.mask, (0, 0)) == None:
                     self.points.append(lastLocation)
                     run = False
+                    print(len)
 
                 else:  # Increment Len
                     len += 1
@@ -80,7 +84,9 @@ class LightSource():
                          (self.points[len(self.points) - 1][0], self.points[len(self.points) - 1][1]))
 
         for index in range(0, len(self.points) - 2):
-            pygame.draw.line(surface, (255, 0, 0), (self.points[index][0], self.points[index][1]), (self.points[index + 1][0], self.points[index + 1][1]))
+            pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
+                             (self.points[index][0], self.points[index][1]))
+            #pygame.draw.line(surface, (255, 0, 0), (self.points[index][0], self.points[index][1]), (self.points[index + 1][0], self.points[index + 1][1]))
 
     #def makeLayer(self):
 
