@@ -103,6 +103,25 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(pygame.image.load('dave.jpg'), (40, 40))
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
+        self.lastSeenX, self.lastSeenY = 0, 0
+
+    def goToLastSeen(self, LOSCoords):  # Requires an [x, y] input
+        print("Dave Center = " + str(self.rect.center))
+        if type(LOSCoords) != bool and len(LOSCoords) == 4:  # Only check if there are 2 elements and checkLOS didn't return False
+            self.lastSeenX = LOSCoords[0]
+            self.lastSeenY = LOSCoords[1]
+            moveX = LOSCoords[0] - self.rect.centerx  # Creates an X difference to move along
+            moveY = LOSCoords[1] - self.rect.centery  # Creates a Y difference to move along
+            self.rect.centerx += moveX/60  # Moves 1/60th of the X stance in one frame, change 60 to change the speed
+            self.rect.centery += moveY/60  # Moves 1/60th the Y distance
+        elif type(LOSCoords) == bool:
+            moveX = self.lastSeenX - self.rect.centerx
+            moveY = self.lastSeenY - self.rect.centery
+            self.rect.centerx += moveX / 60
+            self.rect.centery += moveY / 60
+        if self.rect.centerx == LOSCoords[0] and self.rect.centery == LOSCoords[1]:
+            self.rect.centerx += LOSCoords[2]/2
+            self.rect.centery += LOSCoords[3]/2
 
 
 dave = Enemy()
@@ -122,15 +141,19 @@ class LOSBullet(pygame.sprite.Sprite):
 
     def checkLOS(self):
         self.image = pygame.transform.scale(pygame.image.load('LOSTest.png'), (10, 10))  # Ensures the default image is a black 10x10 square
-        self.rect.x = self.origin.rect.x + self.origin.rect.width / 2  # Align the start of the bullets with the start of the origin(X direction)
-        self.rect.y = self.origin.rect.y + self.origin.rect.height / 2  # Align the start of the bullets with the start of the origin(Y direction)
-        moveX = int(self.target.rect.centerx - self.rect.centerx)  # Creates the X component of the "slope"
-        moveY = int(self.target.rect.centery - self.rect.centery)  # Creates the Y component of the "slope"
+        # self.rect.centerx = self.origin.rect.centerx  # Align the start of the bullets with the start of the origin(X direction)
+        # self.rect.centery = self.origin.rect.centery  # Align the start of the bullets with the start of the origin(Y direction)
+        self.rect.center = self.origin.rect.center
+        moveX = self.target.rect.centerx - self.rect.centerx  # Creates the X component of the "slope"
+        moveY = self.target.rect.centery - self.rect.centery  # Creates the Y component of the "slope"
+        print("Bullet Center = " + str(self.rect.center))
+        print("Target Center = " + str(self.target.rect.center))
+        print("MoveX = " + str(moveX) + ', MoveY = ' + str(moveY))
         lostLOS = False  # A variable that will read TRUE if line of sight is ever broken
 
-        for i in range(29):  # Create and check 29 points
-            self.rect.centerx += moveX / 29  # Moves the bullet 1 29th of the total center-to-center distance(X)
-            self.rect.centery += moveY / 29  # Moves the bullet 1 29th of the total center-to-center distance(Y)
+        for i in range(1):  # Create and check 29 points
+            self.rect.centerx += moveX / 1  # Moves the bullet 1 29th of the total center-to-center distance(X)
+            self.rect.centery += moveY / 1  # Moves the bullet 1 29th of the total center-to-center distance(Y)
 
             if pygame.sprite.collide_mask(self, testMap):  # If even ONE 'bullet' collides with our map, lostLOS becomes TRUE
                 lostLOS = True
@@ -138,14 +161,16 @@ class LOSBullet(pygame.sprite.Sprite):
 
             surface.blit(self.image, self.rect)  # Blit an individual bullet
 
+            if pygame.sprite.collide_mask(self, self.target) and not lostLOS:
+                self.image = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (10, 10))
+
         if lostLOS:  # Returns are based on if lostLOS is TRUE or not, acts as a simple Boolean method
             return True
         else:
-            return False
+            return [self.rect.centerx, self.rect.centery, moveX, moveY]
 
 
-
-playerLOS = LOSBullet(player, dave)
+daveLOS = LOSBullet(dave, player)
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
 
@@ -153,7 +178,8 @@ while True:
     surface.fill((255, 255, 255))
     player.oldX, player.oldY = player.rect[0], player.rect[1]
 
-    playerLOS.checkLOS()
+    #daveLOS.checkLOS()
+    dave.goToLastSeen(daveLOS.checkLOS())
 
     for event in pygame.event.get():
         if event.type == QUIT:
