@@ -8,7 +8,7 @@ from pygame import QUIT
 surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
 fpsClock = pygame.time.Clock()
 FPS = 60
-
+pygame.font.init()
 
 class Map(pygame.sprite.Sprite):
     def __init__(self):
@@ -83,14 +83,27 @@ class Player(pygame.sprite.Sprite):
     # def updateSelf(self):
     #     self.rect = pygame.image.
 
+class Menu:
+    output=pygame.Surface((800,800))
+    font = pygame.font.SysFont('arial', 30)
+    def __init__(self,items,isTitle,itemSize):
+        if isTitle:
+            self.output.blit(pygame.image.load("titlescreen.png"),(0,0))
+        for n in range(len(items)):
+            self.output.blit(self.font.render(items[n],0,(255,255,0)),(20,400+n*itemSize))
+    def getMenu(self):
+        return(self.output)
+
+
 
 player = Player()
 fakePlayer = Player()
 # Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
-
+menu=Menu(["cheese","borgor"],True,10)
 while True:
+
     surface.fill((255, 255, 255))
     player.oldX, player.oldY = player.rect[0], player.rect[1]
 
@@ -169,5 +182,6 @@ while True:
 
     surface.blit(testMap.image, (0, 0))
     surface.blit(player.image, player.rect)
+    surface.blit(menu.getMenu(),(0,0))
     pygame.display.update()
     fpsClock.tick(FPS)
