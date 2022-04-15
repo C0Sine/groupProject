@@ -54,10 +54,11 @@ class LightSource():
             lastLocation[0] = self.location[0]
             lastLocation[1] = self.location[1]
             len = 1
+
             run = True
             while run:
 
-                point = [(self.location[0] + len) * math.cos(math.radians(angle)), (self.location[1] + len) * math.sin(math.radians(angle))]
+                point = [round(self.location[0] + len * math.cos(math.radians(angle))), round(self.location[1] + len * math.sin(math.radians(angle)))]
                 lastLocation[0] = point[0]
                 lastLocation[1] = point[1]
 
@@ -66,13 +67,15 @@ class LightSource():
                 pygame.draw.line(lineSurface, (0, 255, 255), (self.location[0], self.location[1]),
                                  (point[0] * math.cos(math.radians(angle)), point[1] * math.sin(math.radians(angle))))
 
-                if not pygame.mask.from_surface(lineSurface).overlap(testMap.mask, (0, 0)) == None:
+                if testMap.mask.get_at(point) != 0:
+
                     self.points.append(lastLocation)
                     run = False
-                    print(len)
+                    print("FOUND")
 
                 else:  # Increment Len
-                    len += 1
+                    len += 10
+                    print(len)
 
         print(self.points)
 
@@ -83,14 +86,12 @@ class LightSource():
         pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
                          (self.points[len(self.points) - 1][0], self.points[len(self.points) - 1][1]))
 
-        for index in range(0, len(self.points) - 2):
-            pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
-                             (self.points[index][0], self.points[index][1]))
-            #pygame.draw.line(surface, (255, 0, 0), (self.points[index][0], self.points[index][1]), (self.points[index + 1][0], self.points[index + 1][1]))
+        for index in range(0, len(self.points) - 1):
+            pygame.draw.line(surface, (255, 0, 0), (self.points[index][0], self.points[index][1]), (self.points[index + 1][0], self.points[index + 1][1]))
 
     #def makeLayer(self):
 
-source = LightSource([500, 500], 30, 30)
+source = LightSource([500, 500], 110, 150)
 source.calculateLights()
 
 class Player(pygame.sprite.Sprite):
