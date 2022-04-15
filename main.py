@@ -104,6 +104,7 @@ player_speed = 3
 frame = 0
 mouse_x, mouse_y = 0, 0
 player_angle = 0
+target_angle = 0
 while True:
     frame += 1
     surface.fill((255, 255, 255))
@@ -114,7 +115,7 @@ while True:
             print('l8r sk8r')
             sys.exit()
         if event.type == pygame.MOUSEMOTION:
-            mousex, mousey = pygame.mouse.get_pos()
+            mouse_x, mouse_y = pygame.mouse.get_pos()
 
     if True:    # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
@@ -168,7 +169,11 @@ while True:
         target_angle = 270 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
     elif mouse_x < player.rect.x + (player.rect.width / 2):
         target_angle = 90 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
-    player_angle = frame
+    if abs(player_angle - target_angle) > 180:
+        player_angle -= (player_angle - target_angle) / 10
+    else:
+        player_angle -= (player_angle - target_angle) / 10
+    print(player_angle, target_angle)
     blitRotate(surface, player.image, (player.imageX, player.imageY), player_angle)
     pygame.display.update()
     fpsClock.tick(FPS)
