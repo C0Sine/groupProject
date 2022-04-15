@@ -83,16 +83,26 @@ class Player(pygame.sprite.Sprite):
     # def updateSelf(self):
     #     self.rect = pygame.image.
 
+
+#Menu class
 class Menu:
     output=pygame.Surface((800,800))
-    font = pygame.font.SysFont('arial', 30)
-    def __init__(self,items,isTitle,itemSize):
+    def __init__(self,items,isTitle,itemSize,textColor):
+        self.font = pygame.font.SysFont('arial', itemSize)
+        self.isTitle=isTitle
+        self.itemSize
+        displace=0
+        #if its the main menu put game logo on top and move down options
         if isTitle:
             self.output.blit(pygame.image.load("titlescreen.png"),(0,0))
+            displace=400
         for n in range(len(items)):
-            self.output.blit(self.font.render(items[n],0,(255,255,0)),(20,400+n*itemSize))
+            self.output.blit(self.font.render(items[n],0,textColor),(20,displace+n*itemSize))
     def getMenu(self):
         return(self.output)
+    #def click(self,pos):
+
+
 
 
 
@@ -101,7 +111,7 @@ fakePlayer = Player()
 # Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
-menu=Menu(["cheese","borgor"],True,10)
+menu=Menu(["option1","option2","etc"],True,50,(255,255,255))
 while True:
 
     surface.fill((255, 255, 255))
