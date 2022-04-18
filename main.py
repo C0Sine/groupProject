@@ -2,12 +2,16 @@ import keyboard as keyboard
 import pygame
 import random
 import sys
+import math
 
 from pygame import QUIT
 
 surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
 fpsClock = pygame.time.Clock()
 FPS = 60
+
+# maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
+# mask = pygame.mask.from_surface(maskimage)
 
 
 class Map(pygame.sprite.Sprite):
@@ -52,6 +56,61 @@ class WallTest(pygame.sprite.Sprite):
 weirdWall = WallTest()
 weirdWall.rect.x, weirdWall.rect.y = 100, 100
 
+class LightSource():
+    def __init__(self, location, direction, width, strength=None):
+        # direction and width in degrees
+
+        self.location = location
+        self.direction = direction
+        self.width = width
+        self.strength = strength
+        self.points = []
+
+    def changeLocation(self, x, y):
+        self.location = [x, y]
+        self.calculateLights()
+
+    def calculateLights(self):
+        self.points = []
+
+        for angle in range(self.direction, self.direction + self.width + 1):
+            point = [-1, -1]  # stores current point
+            lastLocation = [-1, -1]  # stores previous point so if point is in a wall
+            lastLocation[0] = self.location[0]
+            lastLocation[1] = self.location[1]
+            len = 1
+
+            run = True
+
+            # Increments len until point is inside a wall and then sets the previous point as the boundary
+            while run:
+
+                point = [round(self.location[0] + len * math.cos(math.radians(angle))), round(self.location[1] + len * math.sin(math.radians(angle)))]
+                lastLocation[0] = point[0]
+                lastLocation[1] = point[1]
+
+                if testMap.mask.get_at(point) != 0:
+
+                    self.points.append(lastLocation)
+                    run = False
+
+                else:  # Increment Len
+                    len += 1
+
+
+    def drawLights(self):
+        # Drawns ligns from start location to the edge points
+        pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
+                          (self.points[0][0], self.points[0][1]))
+        pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
+                         (self.points[len(self.points) - 1][0], self.points[len(self.points) - 1][1]))
+
+        for index in range(0, len(self.points) - 1):  # goes through points and draws lines between them
+            pygame.draw.line(surface, (255, 0, 0), (self.points[index][0], self.points[index][1]), (self.points[index + 1][0], self.points[index + 1][1]))
+
+    #def makeLayer(self):
+
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -84,8 +143,13 @@ class Player(pygame.sprite.Sprite):
     #     self.rect = pygame.image.
 
 
+
 player = Player()
 fakePlayer = Player()
+
+source = LightSource([player.rect.centerx, player.rect.centery], 155, 30)
+source.calculateLights()
+
 # Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
@@ -93,6 +157,7 @@ playerspeed = 3
 while True:
     surface.fill((255, 255, 255))
     player.oldX, player.oldY = player.rect[0], player.rect[1]
+    source.changeLocation(player.rect.centerx, player.rect.centery)
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -147,6 +212,8 @@ while True:
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Up')
 
+
+
     # if pygame.sprite.collide_mask(player, testMap):
     #     # Takes the fake player and, using the oldX or oldY, checks to see if it can move in the opposite direction
     #     # For example, if it takes oldY, it will check to see if it could move left or right from the original position
@@ -169,5 +236,6 @@ while True:
 
     surface.blit(testMap.image, (0, 0))
     surface.blit(player.image, player.rect)
+    source.drawLights()
     pygame.display.update()
     fpsClock.tick(FPS)
