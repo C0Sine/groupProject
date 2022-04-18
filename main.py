@@ -90,7 +90,8 @@ class Menu:
     def __init__(self,items,isTitle,itemSize,textColor):
         self.font = pygame.font.SysFont('arial', itemSize)
         self.isTitle=isTitle
-        self.itemSize
+        self.itemSize=itemSize
+        self.items=items
         displace=0
         #if its the main menu put game logo on top and move down options
         if isTitle:
@@ -100,7 +101,14 @@ class Menu:
             self.output.blit(self.font.render(items[n],0,textColor),(20,displace+n*itemSize))
     def getMenu(self):
         return(self.output)
-    #def click(self,pos):
+    def click(self,pos):
+        offset=0
+        if self.isTitle:
+            offset=400
+        itemClicked=int((pos[1]-offset)/self.itemSize)
+        if itemClicked>=len(self.items):
+            itemClicked=None
+        return itemClicked
 
 
 
@@ -111,7 +119,7 @@ fakePlayer = Player()
 # Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
-menu=Menu(["option1","option2","etc"],True,50,(255,255,255))
+menu=Menu(["option1","option2","etc"],False,50,(255,255,255))
 while True:
 
     surface.fill((255, 255, 255))
@@ -122,7 +130,9 @@ while True:
             pygame.quit()
             print('l8r sk8r')
             sys.exit()
-
+        if event.type == pygame.MOUSEBUTTONUP:
+            pos = pygame.mouse.get_pos()
+            menu.click(pos)
     if True:    # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
             player.updatePosition(0 - round(playerspeed * 0.707), 0)
