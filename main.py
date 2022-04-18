@@ -48,24 +48,21 @@ class LightSource():
 
     def calculateLights(self):
 
-        for angle in range(self.direction, self.direction + self.width):
-            point = [-1, -1]
-            lastLocation = [-1, -1]
+        for angle in range(self.direction, self.direction + self.width + 1):
+            point = [-1, -1]  # stores current point
+            lastLocation = [-1, -1]  # stores previous point so if point is in a wall
             lastLocation[0] = self.location[0]
             lastLocation[1] = self.location[1]
             len = 1
 
             run = True
+
+            # Increments len until point is inside a wall and then sets the previous point as the boundary
             while run:
 
                 point = [round(self.location[0] + len * math.cos(math.radians(angle))), round(self.location[1] + len * math.sin(math.radians(angle)))]
                 lastLocation[0] = point[0]
                 lastLocation[1] = point[1]
-
-                lineSurface = pygame.Surface((800, 800))
-
-                pygame.draw.line(lineSurface, (0, 255, 255), (self.location[0], self.location[1]),
-                                 (point[0] * math.cos(math.radians(angle)), point[1] * math.sin(math.radians(angle))))
 
                 if testMap.mask.get_at(point) != 0:
 
@@ -74,24 +71,25 @@ class LightSource():
                     print("FOUND")
 
                 else:  # Increment Len
-                    len += 10
+                    len += 1
                     print(len)
 
         print(self.points)
 
 
     def drawLights(self):
+        # Drawns ligns from start location to the edge points
         pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
                           (self.points[0][0], self.points[0][1]))
         pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
                          (self.points[len(self.points) - 1][0], self.points[len(self.points) - 1][1]))
 
-        for index in range(0, len(self.points) - 1):
+        for index in range(0, len(self.points) - 1):  # goes through points and draws lines between them
             pygame.draw.line(surface, (255, 0, 0), (self.points[index][0], self.points[index][1]), (self.points[index + 1][0], self.points[index + 1][1]))
 
     #def makeLayer(self):
 
-source = LightSource([500, 500], 110, 150)
+source = LightSource([500, 500], 90, 270)
 source.calculateLights()
 
 class Player(pygame.sprite.Sprite):
