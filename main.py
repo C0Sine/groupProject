@@ -214,22 +214,22 @@ class Enemy(pygame.sprite.Sprite):
                 self.noMove = True
                 self.tempseenX = self.lastSeenX
                 if self.mask.overlap(testMap.mask, offset)[1] >= self.rect.height / 2:
-                    self.tempseenY = self.rect.centery + overlapMask.get_rect().height
-                    print("OVERLAP HEIGHT = " + overlapMask.get_rect().height)
+                    self.tempseenY = self.rect.centery + overlapMask.get_rect().height - self.rect.width + 1
+                    print("OVERLAP HEIGHT = " + str(overlapMask.get_rect().height))
                 else:
-                    self.tempseenY = self.rect.centery - overlapMask.get_rect().height
-                    print("OVERLAP Height = " + overlapMask.get_rect().height)
+                    self.tempseenY = self.rect.centery - overlapMask.get_rect().height - self.rect.width + 1
+                    print("OVERLAP Height = " + str(overlapMask.get_rect().height))
                 print("Vertical Collision: tempX = " + str(self.tempseenX) + ", tempY = " + str(self.tempseenY))
                 pygame.draw.circle(surface, (255, 0, 0), (self.tempseenX, self.tempseenY), 4)
             elif self.rect.height / 3 < self.mask.overlap(testMap.mask, offset)[1] < self.rect.height * 2 / 3:
                 self.noMove = True
                 self.tempseenY = self.lastSeenY
                 if self.mask.overlap(testMap.mask, offset)[0] >= self.rect.width / 2:
-                    self.tempseenX = self.rect.centerx - overlapMask.get_rect().width
-                    print("OVERLAP WIDTH = " + overlapMask.get_rect().width)
+                    self.tempseenX = self.rect.centerx - overlapMask.get_rect().width - self.rect.width + 1
+                    print("OVERLAP WIDTH = " + str(overlapMask.get_rect().width))
                 else:
-                    self.tempseenX = self.rect.centerx + overlapMask.get_rect().width
-                    print("OVERLAP WIDTH = " + overlapMask.get_rect().width)
+                    self.tempseenX = self.rect.centerx + overlapMask.get_rect().width - self.rect.width + 1
+                    print("OVERLAP WIDTH = " + str(overlapMask.get_rect().width))
                 print("Horizontal Collision: tempX = " + str(self.tempseenX) + ", tempY = " + str(self.tempseenY))
                 pygame.draw.circle(surface, (255, 0, 0), (self.tempseenX, self.tempseenY), 4)
 
