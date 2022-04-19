@@ -157,21 +157,28 @@ class Player(pygame.sprite.Sprite):
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('dave.jpg'), (40, 40))
+        self.image = pygame.transform.scale(pygame.image.load('fakeEnemy.png'), (40, 40))
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
+        self.noMove = False
+        self.tempseenX, self.tempseenY = 0, 0
 
     def goToLastSeen(self, LOSCoords, Target):  # Requires a True/False input from checkLOS AND a target
         moveX, moveY = 0, 0
         if not LOSCoords[0]:
+            self.noMove = False
             moveX = Target.rect.centerx - self.rect.centerx  # Creates an X difference to move along
             moveY = Target.rect.centery - self.rect.centery  # Creates a Y difference to move along
-            self.lastSeenX = LOSCoords[1]
+            self.lastSeenX = LOSCoords[1]  # Store last seen location
             self.lastSeenY = LOSCoords[2]
-        if LOSCoords[0]:
-            moveX = self.lastSeenX - self.rect.centerx  # Creates an X difference to move along
-            moveY = self.lastSeenY - self.rect.centery  # Creates a Y difference to move along
+        if LOSCoords[0] and not self.noMove:
+            pygame.draw.circle(surface, (0, 255, 0), (self.lastSeenX, self.lastSeenY), 4)
+            moveX = self.lastSeenX - self.rect.centerx  # If there is NO LOS, move to last seen X and Y
+            moveY = self.lastSeenY - self.rect.centery
+        elif LOSCoords[0] and self.noMove:  # If movement is blocked, move to a direction cardinal to the last Seen
+            moveX = self.tempseenX - self.rect.centerx
+            moveY = self.tempseenY - self.rect.centery
         delx, dely = 0, 0
         if moveX == 0 and moveY != 0:
             delx = 0
@@ -195,20 +202,39 @@ class Enemy(pygame.sprite.Sprite):
             else:
                 delx = (2 / math.sqrt(1 + math.pow(moveY / moveX, 2)))
             dely = delx * (moveY / moveX)
-        if pygame.sprite.collide_mask(self, Target):
+        if pygame.sprite.collide_mask(self, Target):  # Don't move if Enemy collides with Target
             delx, dely = 0, 0
 
         if pygame.sprite.collide_mask(self, testMap):
-            offset = (self.rect.x - testMap.rect.x, self.rect.y - testMap.rect.y)
-            if delx >= 0:
-                self.rect.x -= self.mask.overlap_mask(testMap.mask, offset).get_rect().width - self.rect.width + 1
-            else:
-                self.rect.x += self.mask.overlap_mask(testMap.mask, offset).get_rect().width - self.rect.width + 1
-            if dely >= 0:
-                self.rect.y -= self.mask.overlap_mask(testMap.mask, offset).get_rect().height - self.rect.width + 1
-            else:
-                self.rect.y += self.mask.overlap_mask(testMap.mask, offset).get_rect().height - self.rect.width + 1
-        print(math.sqrt(math.pow(delx, 2) + math.pow(dely, 2)))
+            offset = (testMap.rect.x - self.rect.x, testMap.rect.y - self.rect.y)
+            overlapMask = self.mask.overlap_mask(testMap.mask, offset)
+            print(self.mask.overlap(testMap.mask, offset))
+            print("lastseenX = " + str(self.lastSeenX) + ", lastseenY = " + str(self.lastSeenY))
+            if self.rect.width / 3 < self.mask.overlap(testMap.mask, offset)[0] < self.rect.width * 2 / 3:
+                self.noMove = True
+                self.tempseenX = self.lastSeenX
+                if self.mask.overlap(testMap.mask, offset)[1] >= self.rect.height / 2:
+                    self.tempseenY = self.rect.centery + overlapMask.get_rect().height
+                    print("OVERLAP HEIGHT = " + overlapMask.get_rect().height)
+                else:
+                    self.tempseenY = self.rect.centery - overlapMask.get_rect().height
+                    print("OVERLAP Height = " + overlapMask.get_rect().height)
+                print("Vertical Collision: tempX = " + str(self.tempseenX) + ", tempY = " + str(self.tempseenY))
+                pygame.draw.circle(surface, (255, 0, 0), (self.tempseenX, self.tempseenY), 4)
+            elif self.rect.height / 3 < self.mask.overlap(testMap.mask, offset)[1] < self.rect.height * 2 / 3:
+                self.noMove = True
+                self.tempseenY = self.lastSeenY
+                if self.mask.overlap(testMap.mask, offset)[0] >= self.rect.width / 2:
+                    self.tempseenX = self.rect.centerx - overlapMask.get_rect().width
+                    print("OVERLAP WIDTH = " + overlapMask.get_rect().width)
+                else:
+                    self.tempseenX = self.rect.centerx + overlapMask.get_rect().width
+                    print("OVERLAP WIDTH = " + overlapMask.get_rect().width)
+                print("Horizontal Collision: tempX = " + str(self.tempseenX) + ", tempY = " + str(self.tempseenY))
+                pygame.draw.circle(surface, (255, 0, 0), (self.tempseenX, self.tempseenY), 4)
+
+
+        #print(math.sqrt(math.pow(delx, 2) + math.pow(dely, 2)))
         self.rect.centerx += delx
         self.rect.centery += dely
 
@@ -237,9 +263,9 @@ class LOSBullet(pygame.sprite.Sprite):
         moveY = self.target.rect.centery - self.rect.centery  # Creates the Y component of the "slope"
         lostLOS = False  # A variable that will read TRUE if line of sight is ever broken
 
-        for i in range(29):  # Create and check 29 points
-            self.rect.centerx += moveX / 29  # Moves the bullet 1 29th of the total center-to-center distance(X)
-            self.rect.centery += moveY / 29  # Moves the bullet 1 29th of the total center-to-center distance(Y)
+        for i in range(25):  # Create and check 25 points
+            self.rect.centerx += moveX / 25  # Moves the bullet 1 29th of the total center-to-center distance(X)
+            self.rect.centery += moveY / 25  # Moves the bullet 1 29th of the total center-to-center distance(Y)
 
             if pygame.sprite.collide_mask(self,
                                           testMap):  # If even ONE 'bullet' collides with our map, lostLOS becomes TRUE
