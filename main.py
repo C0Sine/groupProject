@@ -7,6 +7,7 @@ import math
 from pygame import QUIT
 
 surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
+surface.convert_alpha()
 fpsClock = pygame.time.Clock()
 FPS = 60
 
@@ -107,9 +108,9 @@ class LightSource():
 
         self.points.append(self.location)
 
-        temp.fill((0, 0, 0, 0))
-
-        pygame.draw.polygon(temp, (255, 255, 255, 255), self.points)
+        temp.fill((0, 0, 0, 255))
+        pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
+        pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
 
         surface.blit(temp, (0, 0))
 
@@ -239,8 +240,9 @@ while True:
     #     if pygame.sprite.collide_mask(fakePlayer, testMap):
     #         player.rect.y = player.oldY
 
+
+    source.drawLights()
     surface.blit(testMap.image, (0, 0))
     surface.blit(player.image, player.rect)
-    source.drawLights()
     pygame.display.update()
     fpsClock.tick(FPS)
