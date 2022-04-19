@@ -2,6 +2,7 @@ import keyboard as keyboard
 import pygame
 import random
 import sys
+import math
 
 from pygame import QUIT
 
@@ -51,6 +52,62 @@ class WallTest(pygame.sprite.Sprite):
 
 weirdWall = WallTest()
 weirdWall.rect.x, weirdWall.rect.y = 100, 100
+
+
+class LightSource():
+    def __init__(self, location, direction, width, strength=None):
+        # direction and width in degrees
+
+        self.location = location
+        self.direction = direction
+        self.width = width
+        self.strength = strength
+        self.points = []
+
+    def changeLocation(self, x, y):
+        self.location = [x, y]
+        self.calculateLights()
+
+    def calculateLights(self):
+        self.points = []
+
+        for angle in range(self.direction, self.direction + self.width + 1):
+            point = [-1, -1]  # stores current point
+            lastLocation = [-1, -1]  # stores previous point so if point is in a wall
+            lastLocation[0] = self.location[0]
+            lastLocation[1] = self.location[1]
+            len = 1
+
+            run = True
+
+            # Increments len until point is inside a wall and then sets the previous point as the boundary
+            while run:
+
+                point = [round(self.location[0] + len * math.cos(math.radians(angle))),
+                         round(self.location[1] + len * math.sin(math.radians(angle)))]
+                lastLocation[0] = point[0]
+                lastLocation[1] = point[1]
+
+                if testMap.mask.get_at(point) != 0:
+
+                    self.points.append(lastLocation)
+                    run = False
+
+                else:  # Increment Len
+                    len += 1
+
+    def drawLights(self):
+        # Drawns ligns from start location to the edge points
+        pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
+                         (self.points[0][0], self.points[0][1]))
+        pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
+                         (self.points[len(self.points) - 1][0], self.points[len(self.points) - 1][1]))
+
+        for index in range(0, len(self.points) - 1):  # goes through points and draws lines between them
+            pygame.draw.line(surface, (255, 0, 0), (self.points[index][0], self.points[index][1]),
+                             (self.points[index + 1][0], self.points[index + 1][1]))
+
+    # def makeLayer(self):
 
 
 class Player(pygame.sprite.Sprite):
@@ -105,23 +162,55 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
 
-    def goToLastSeen(self, LOSCoords):  # Requires an [x, y] input
-        print("Dave Center = " + str(self.rect.center))
-        if type(LOSCoords) != bool and len(LOSCoords) == 4:  # Only check if there are 2 elements and checkLOS didn't return False
-            self.lastSeenX = LOSCoords[0]
-            self.lastSeenY = LOSCoords[1]
-            moveX = LOSCoords[0] - self.rect.centerx  # Creates an X difference to move along
-            moveY = LOSCoords[1] - self.rect.centery  # Creates a Y difference to move along
-            self.rect.centerx += moveX/60  # Moves 1/60th of the X stance in one frame, change 60 to change the speed
-            self.rect.centery += moveY/60  # Moves 1/60th the Y distance
-        elif type(LOSCoords) == bool:
-            moveX = self.lastSeenX - self.rect.centerx
-            moveY = self.lastSeenY - self.rect.centery
-            self.rect.centerx += moveX / 60
-            self.rect.centery += moveY / 60
-        if self.rect.centerx == LOSCoords[0] and self.rect.centery == LOSCoords[1]:
-            self.rect.centerx += LOSCoords[2]/2
-            self.rect.centery += LOSCoords[3]/2
+    def goToLastSeen(self, LOSCoords, Target):  # Requires a True/False input from checkLOS AND a target
+        moveX, moveY = 0, 0
+        if not LOSCoords[0]:
+            moveX = Target.rect.centerx - self.rect.centerx  # Creates an X difference to move along
+            moveY = Target.rect.centery - self.rect.centery  # Creates a Y difference to move along
+            self.lastSeenX = LOSCoords[1]
+            self.lastSeenY = LOSCoords[2]
+        if LOSCoords[0]:
+            moveX = self.lastSeenX - self.rect.centerx  # Creates an X difference to move along
+            moveY = self.lastSeenY - self.rect.centery  # Creates a Y difference to move along
+        delx, dely = 0, 0
+        if moveX == 0 and moveY != 0:
+            delx = 0
+            if moveY > 0:
+                dely = 2
+            else:
+                dely = -2
+            if 0 < moveY < 2:
+                dely = moveY
+        if moveY == 0 and moveX != 0:
+            delx, dely = 2, 0
+            if moveX > 0:
+                delx = 2
+            else:
+                delx = -2
+            if 0 < moveX < 2:
+                delx = moveX
+        if moveX != 0 and moveY != 0:
+            if moveX < 0:
+                delx = (2 / math.sqrt(1 + math.pow(moveY / moveX, 2))) * -1
+            else:
+                delx = (2 / math.sqrt(1 + math.pow(moveY / moveX, 2)))
+            dely = delx * (moveY / moveX)
+        if pygame.sprite.collide_mask(self, Target):
+            delx, dely = 0, 0
+
+        if pygame.sprite.collide_mask(self, testMap):
+            offset = (self.rect.x - testMap.rect.x, self.rect.y - testMap.rect.y)
+            if delx >= 0:
+                self.rect.x -= self.mask.overlap_mask(testMap.mask, offset).get_rect().width - self.rect.width + 1
+            else:
+                self.rect.x += self.mask.overlap_mask(testMap.mask, offset).get_rect().width - self.rect.width + 1
+            if dely >= 0:
+                self.rect.y -= self.mask.overlap_mask(testMap.mask, offset).get_rect().height - self.rect.width + 1
+            else:
+                self.rect.y += self.mask.overlap_mask(testMap.mask, offset).get_rect().height - self.rect.width + 1
+        print(math.sqrt(math.pow(delx, 2) + math.pow(dely, 2)))
+        self.rect.centerx += delx
+        self.rect.centery += dely
 
 
 dave = Enemy()
@@ -140,46 +229,47 @@ class LOSBullet(pygame.sprite.Sprite):
         self.rect.center = self.origin.rect.center
 
     def checkLOS(self):
-        self.image = pygame.transform.scale(pygame.image.load('LOSTest.png'), (10, 10))  # Ensures the default image is a black 10x10 square
-        # self.rect.centerx = self.origin.rect.centerx  # Align the start of the bullets with the start of the origin(X direction)
-        # self.rect.centery = self.origin.rect.centery  # Align the start of the bullets with the start of the origin(Y direction)
+        # ONLY CHANGE NEEDED: MAKE IT SO LOS NOT LOST ON LEFT WALL/CENTER BETTER ON PLAYER :)
+        self.image = pygame.transform.scale(pygame.image.load('LOSTest.png'),
+                                            (10, 10))  # Ensures the default image is a black 10x10 square
         self.rect.center = self.origin.rect.center
         moveX = self.target.rect.centerx - self.rect.centerx  # Creates the X component of the "slope"
         moveY = self.target.rect.centery - self.rect.centery  # Creates the Y component of the "slope"
-        print("Bullet Center = " + str(self.rect.center))
-        print("Target Center = " + str(self.target.rect.center))
-        print("MoveX = " + str(moveX) + ', MoveY = ' + str(moveY))
         lostLOS = False  # A variable that will read TRUE if line of sight is ever broken
 
-        for i in range(1):  # Create and check 29 points
-            self.rect.centerx += moveX / 1  # Moves the bullet 1 29th of the total center-to-center distance(X)
-            self.rect.centery += moveY / 1  # Moves the bullet 1 29th of the total center-to-center distance(Y)
+        for i in range(29):  # Create and check 29 points
+            self.rect.centerx += moveX / 29  # Moves the bullet 1 29th of the total center-to-center distance(X)
+            self.rect.centery += moveY / 29  # Moves the bullet 1 29th of the total center-to-center distance(Y)
 
-            if pygame.sprite.collide_mask(self, testMap):  # If even ONE 'bullet' collides with our map, lostLOS becomes TRUE
+            if pygame.sprite.collide_mask(self,
+                                          testMap):  # If even ONE 'bullet' collides with our map, lostLOS becomes TRUE
                 lostLOS = True
-                self.image = pygame.transform.scale(pygame.image.load('LOSBroken.png'), (10, 10))  # Make it so the colliding bullets and everything past appear red
+                self.image = pygame.transform.scale(pygame.image.load('LOSBroken.png'), (
+                10, 10))  # Make it so the colliding bullets and everything past appear red
 
-            surface.blit(self.image, self.rect)  # Blit an individual bullet
+            surface.blit(self.image, self.rect)  # Blit an individual bullet, not needed unless testing
 
             if pygame.sprite.collide_mask(self, self.target) and not lostLOS:
                 self.image = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (10, 10))
 
-        if lostLOS:  # Returns are based on if lostLOS is TRUE or not, acts as a simple Boolean method
-            return True
-        else:
-            return [self.rect.centerx, self.rect.centery, moveX, moveY]
+        return [lostLOS, self.target.rect.centerx,
+                self.target.rect.centery]  # Returns True/False based on if LOS was broken and a last seen location
 
 
 daveLOS = LOSBullet(dave, player)
+source = LightSource([player.rect.centerx, player.rect.centery], 155, 30)
+source.calculateLights()
+
+# Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
 
 while True:
     surface.fill((255, 255, 255))
     player.oldX, player.oldY = player.rect[0], player.rect[1]
-
-    #daveLOS.checkLOS()
-    dave.goToLastSeen(daveLOS.checkLOS())
+    source.changeLocation(player.rect.centerx, player.rect.centery)
+    source.drawLights()
+    dave.goToLastSeen(daveLOS.checkLOS(), player)
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -241,5 +331,6 @@ while True:
     surface.blit(testMap.image, testMap.rect)
     surface.blit(dave.image, dave.rect)
     surface.blit(player.image, player.rect)
+    source.drawLights()
     pygame.display.update()
     fpsClock.tick(FPS)
