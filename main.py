@@ -96,17 +96,20 @@ class Menu:
         #if its the main menu put game logo on top and move down options
         if isTitle:
             self.output.blit(pygame.image.load("titlescreen.png"),(0,0))
-            displace=400
+            displace=400+(self.itemSize/2)
         for n in range(len(items)):
-            self.output.blit(self.font.render(items[n],0,textColor),(20,displace+n*itemSize))
+            text=self.font.render(items[n],0,textColor)
+            text_rect = text.get_rect(center=(400, (n*itemSize)+displace))
+            self.output.blit(text, text_rect)
     def getMenu(self):
         return(self.output)
     def click(self,pos):
+        #finds and returns what item is clicked
         offset=0
         if self.isTitle:
-            offset=400
+            offset=400+(self.itemSize/2)
         itemClicked=int((pos[1]-offset)/self.itemSize)
-        if itemClicked>=len(self.items):
+        if 0>itemClicked>=len(self.items) or 200>pos[0] or 600<pos[0]:
             itemClicked=None
         return itemClicked
 
@@ -119,7 +122,10 @@ fakePlayer = Player()
 # Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
-menu=Menu(["option1","option2","etc"],False,50,(255,255,255))
+#game pause variable
+gaming=False
+
+menu=Menu(["Play","Close","Credits"],True,50,(255,255,255))
 while True:
 
     surface.fill((255, 255, 255))
@@ -132,8 +138,15 @@ while True:
             sys.exit()
         if event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
-            menu.click(pos)
-    if True:    # Movement
+            print(str(pos))
+            item=menu.click(pos)
+            if item==0:
+                gaming=True
+            elif item==1:
+                pygame.quit()
+                print('l8r sk8r')
+                sys.exit()
+    if gaming:    # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
             player.updatePosition(0 - round(playerspeed * 0.707), 0)
             if pygame.sprite.collide_mask(player, testMap):
@@ -200,8 +213,10 @@ while True:
     #     if pygame.sprite.collide_mask(fakePlayer, testMap):
     #         player.rect.y = player.oldY
 
-    surface.blit(testMap.image, (0, 0))
-    surface.blit(player.image, player.rect)
-    surface.blit(menu.getMenu(),(0,0))
+    if gaming:
+        surface.blit(testMap.image, (0, 0))
+        surface.blit(player.image, player.rect)
+    else:
+        surface.blit(menu.getMenu(),(0,0))
     pygame.display.update()
     fpsClock.tick(FPS)
