@@ -202,7 +202,6 @@ while True:
             sys.exit()
         if event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
-            print(str(pos))
             item=menu.click(pos)
             if item==0:
                 gaming=True
@@ -210,6 +209,8 @@ while True:
                 pygame.quit()
                 print('l8r sk8r')
                 sys.exit()
+            elif item==2:
+                print("credits coming soon")
     if gaming:    # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
             player.updatePosition(0 - round(playerspeed * 0.707), 0)
