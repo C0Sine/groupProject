@@ -7,6 +7,7 @@ import math
 from pygame import QUIT
 
 surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
+surface.convert_alpha()
 fpsClock = pygame.time.Clock()
 FPS = 60
 
@@ -44,6 +45,10 @@ class Map(pygame.sprite.Sprite):
 testMap = Map()
 
 testMap.loadMap('map1.txt')
+
+temp = surface.copy()
+temp.convert_alpha()
+
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
@@ -95,18 +100,19 @@ class LightSource():
                     run = False
 
                 else:  # Increment Len
-                    len += 1
+                    len += 1 #change it to 2 and then check the point behind it if it detects a wall
 
 
     def drawLights(self):
         # Drawns ligns from start location to the edge points
-        pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
-                          (self.points[0][0], self.points[0][1]))
-        pygame.draw.line(surface, (255, 0, 0), (self.location[0], self.location[1]),
-                         (self.points[len(self.points) - 1][0], self.points[len(self.points) - 1][1]))
 
-        for index in range(0, len(self.points) - 1):  # goes through points and draws lines between them
-            pygame.draw.line(surface, (255, 0, 0), (self.points[index][0], self.points[index][1]), (self.points[index + 1][0], self.points[index + 1][1]))
+        self.points.append(self.location)
+
+        temp.fill((0, 0, 0, 255))
+        pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
+        pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
+
+        surface.blit(temp, (0, 0))
 
     #def makeLayer(self):
 
@@ -234,8 +240,9 @@ while True:
     #     if pygame.sprite.collide_mask(fakePlayer, testMap):
     #         player.rect.y = player.oldY
 
+
+    source.drawLights()
     surface.blit(testMap.image, (0, 0))
     surface.blit(player.image, player.rect)
-    source.drawLights()
     pygame.display.update()
     fpsClock.tick(FPS)
