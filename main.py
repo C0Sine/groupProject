@@ -5,7 +5,7 @@ import sys
 import math
 
 from pygame import QUIT
-
+pygame.init()
 surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
 surface.convert_alpha()
 fpsClock = pygame.time.Clock()
@@ -14,7 +14,11 @@ FPS = 60
 # maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
 # mask = pygame.mask.from_surface(maskimage)
 
-
+font = pygame.font.SysFont("Jokerman", 30)
+def update_fps():
+    fps = str(int(fpsClock.get_fps()))
+    fps_text = font.render(fps, 1, pygame.Color("coral"))
+    return fps_text
 class Map(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -244,5 +248,6 @@ while True:
     source.drawLights()
     surface.blit(testMap.image, (0, 0))
     surface.blit(player.image, player.rect)
+    surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
