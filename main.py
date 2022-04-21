@@ -49,7 +49,7 @@ testMap = Map()
 
 testMap.loadMap('map1.txt')
 
-temp = surface.copy()
+temp = pygame.Surface((800,800),pygame.SRCALPHA)
 temp.convert_alpha()
 
 
@@ -114,7 +114,7 @@ class LightSource():
 
         self.points.append(self.location)
 
-        temp.fill((0, 0, 0, 255))
+        temp.fill((0, 0, 0, 230))
         pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
         pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
 
@@ -252,7 +252,6 @@ while True:
                 source.changeLocation(player.rect.centerx, player.rect.centery)
                 print('change')
 
-    source.drawLights()
     surface.blit(testMap.image, (0, 0))
 
     if mouse_x > player.rect.x + (player.rect.width / 2):
@@ -268,6 +267,7 @@ while True:
         source.changeDirection(int(-(source.width / 2) - player_angle - 90))
 
     blitRotate(surface, player.image, (player.imageX, player.imageY), player_angle)
+    source.drawLights()
     surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
