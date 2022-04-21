@@ -86,7 +86,8 @@ class LightSource():
     def calculateLights(self):
         self.points = []
 
-        for angle in range(self.direction, self.direction + self.width + 1):
+        angle = self.direction
+        while angle < self.direction + self.width + 1:
             point = [-1, -1]  # stores current point
             lastLocation = [-1, -1]  # stores previous point so if point is in a wall
             lastLocation[0] = self.location[0]
@@ -102,13 +103,14 @@ class LightSource():
                 lastLocation[0] = point[0]
                 lastLocation[1] = point[1]
 
-                if testMap.mask.get_at(point) != 0:
+                if testMap.mask.get_at(point) != 0 or len > self.strength:
 
                     self.points.append(lastLocation)
                     run = False
 
                 else:  # Increment Len
                     len += 10 #change it to 2 and then check the point behind it if it detects a wall
+            angle += 0.5
 
     def drawLights(self):
         # Drawns ligns from start location to the edge points
@@ -170,7 +172,7 @@ def blitRotate(surf, image, topleft, angle):
 
 player = Player()
 
-source = LightSource([player.rect.centerx, player.rect.centery], 155, 60)
+source = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
 source.calculateLights()
 
 player_speed = 3
@@ -254,8 +256,7 @@ while True:
                 source.changeLocation(player.rect.centerx, player.rect.centery)
                 print('change')
 
-    source.drawLights()
-    surface.blit(testMap.image, (0, 0))
+
     if mouse_x > player.rect.x + (player.rect.width / 2):
         target_angle = 270 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
     elif mouse_x < player.rect.x + (player.rect.width / 2):
@@ -268,7 +269,9 @@ while True:
     if int(player_angle) != int(target_angle):
         source.changeDirection(int(-(source.width / 2) - player_angle - 90))
 
-    surface.blit(update_fps(), (10, 0))
+    source.drawLights()
+    surface.blit(testMap.image, (0, 0))
     blitRotate(surface, player.image, (player.imageX, player.imageY), player_angle)
+    surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
