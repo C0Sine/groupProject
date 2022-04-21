@@ -268,7 +268,6 @@ while True:
 
     blitRotate(surface, player.image, (player.imageX, player.imageY), player_angle)
     source.drawLights()
-    surface.blit(player.image, player.rect)
     surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
