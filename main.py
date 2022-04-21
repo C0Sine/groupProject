@@ -5,7 +5,7 @@ import sys
 import math
 
 from pygame import QUIT
-
+pygame.init()
 surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
 surface.convert_alpha()
 fpsClock = pygame.time.Clock()
@@ -14,7 +14,11 @@ FPS = 60
 # maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
 # mask = pygame.mask.from_surface(maskimage)
 
-
+font = pygame.font.SysFont("Jokerman", 30)
+def update_fps():
+    fps = str(int(fpsClock.get_fps()))
+    fps_text = font.render(fps, 1, pygame.Color("coral"))
+    return fps_text
 class Map(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -39,6 +43,7 @@ class Map(pygame.sprite.Sprite):
         self.image = tempsurf   # sets map to the loaded map
         self.mask = pygame.mask.from_surface(tempsurf)
         self.rect = self.mask.get_rect()
+
 
 
 testMap = Map()
@@ -117,6 +122,7 @@ class LightSource():
         surface.blit(temp, (0, 0))
 
     #def makeLayer(self):
+
 
 
 class Player(pygame.sprite.Sprite):
@@ -262,6 +268,7 @@ while True:
     if int(player_angle) != int(target_angle):
         source.changeDirection(int(-(source.width / 2) - player_angle - 90))
 
+    surface.blit(update_fps(), (10, 0))
     blitRotate(surface, player.image, (player.imageX, player.imageY), player_angle)
     pygame.display.update()
     fpsClock.tick(FPS)
