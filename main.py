@@ -167,18 +167,27 @@ class Enemy(pygame.sprite.Sprite):
     def goToLastSeen(self, LOSCoords, Target):  # Requires a True/False input from checkLOS AND a target
         moveX, moveY = 0, 0
         if not LOSCoords[0]:
+            print("Moving to LOS")
             self.noMove = False
             moveX = Target.rect.centerx - self.rect.centerx  # Creates an X difference to move along
             moveY = Target.rect.centery - self.rect.centery  # Creates a Y difference to move along
             self.lastSeenX = LOSCoords[1]  # Store last seen location
             self.lastSeenY = LOSCoords[2]
         if LOSCoords[0] and not self.noMove:
+            print("Moving to LAST SEEN")
             pygame.draw.circle(surface, (0, 255, 0), (self.lastSeenX, self.lastSeenY), 4)
             moveX = self.lastSeenX - self.rect.centerx  # If there is NO LOS, move to last seen X and Y
             moveY = self.lastSeenY - self.rect.centery
         elif LOSCoords[0] and self.noMove:  # If movement is blocked, move to a direction cardinal to the last Seen
+            print("Moving to Temp")
+            pygame.draw.circle(surface, (255, 0, 0), (self.tempseenX, self.tempseenY), 4)
             moveX = self.tempseenX - self.rect.centerx
             moveY = self.tempseenY - self.rect.centery
+            if moveX == 0 and moveY == 0:
+                self.noMove = False
+                moveX = self.lastSeenX - self.rect.centerx
+                moveY = self.lastSeenY - self.rect.centery
+
         delx, dely = 0, 0
         if moveX == 0 and moveY != 0:
             delx = 0
@@ -204,39 +213,42 @@ class Enemy(pygame.sprite.Sprite):
             dely = delx * (moveY / moveX)
         if pygame.sprite.collide_mask(self, Target):  # Don't move if Enemy collides with Target
             delx, dely = 0, 0
-
-        if pygame.sprite.collide_mask(self, testMap):
-            offset = (testMap.rect.x - self.rect.x, testMap.rect.y - self.rect.y)
-            overlapMask = self.mask.overlap_mask(testMap.mask, offset)
-            print(self.mask.overlap(testMap.mask, offset))
-            print("lastseenX = " + str(self.lastSeenX) + ", lastseenY = " + str(self.lastSeenY))
-            if self.rect.width / 3 < self.mask.overlap(testMap.mask, offset)[0] < self.rect.width * 2 / 3:
-                self.noMove = True
-                self.tempseenX = self.lastSeenX
-                if self.mask.overlap(testMap.mask, offset)[1] >= self.rect.height / 2:
-                    self.tempseenY = self.rect.centery + overlapMask.get_rect().height - self.rect.width + 1
-                    print("OVERLAP HEIGHT = " + str(overlapMask.get_rect().height))
-                else:
-                    self.tempseenY = self.rect.centery - overlapMask.get_rect().height - self.rect.width + 1
-                    print("OVERLAP Height = " + str(overlapMask.get_rect().height))
-                print("Vertical Collision: tempX = " + str(self.tempseenX) + ", tempY = " + str(self.tempseenY))
-                pygame.draw.circle(surface, (255, 0, 0), (self.tempseenX, self.tempseenY), 4)
-            elif self.rect.height / 3 < self.mask.overlap(testMap.mask, offset)[1] < self.rect.height * 2 / 3:
-                self.noMove = True
-                self.tempseenY = self.lastSeenY
-                if self.mask.overlap(testMap.mask, offset)[0] >= self.rect.width / 2:
-                    self.tempseenX = self.rect.centerx - overlapMask.get_rect().width - self.rect.width + 1
-                    print("OVERLAP WIDTH = " + str(overlapMask.get_rect().width))
-                else:
-                    self.tempseenX = self.rect.centerx + overlapMask.get_rect().width - self.rect.width + 1
-                    print("OVERLAP WIDTH = " + str(overlapMask.get_rect().width))
-                print("Horizontal Collision: tempX = " + str(self.tempseenX) + ", tempY = " + str(self.tempseenY))
-                pygame.draw.circle(surface, (255, 0, 0), (self.tempseenX, self.tempseenY), 4)
-
+        if moveX == 0 and moveY == 0:
+            delx, dely = 0, 0
 
         #print(math.sqrt(math.pow(delx, 2) + math.pow(dely, 2)))
         self.rect.centerx += delx
         self.rect.centery += dely
+
+        if pygame.sprite.collide_mask(self, testMap):
+            if LOSCoords[0]:
+                self.noMove = True
+            colX, colY = 0, 0
+            while pygame.sprite.collide_mask(self, testMap):
+                if delx >= 0:
+                    self.rect.centerx -= 1
+                    colX -= 1
+                elif delx < 0:
+                    self.rect.centerx += 1
+                    colX += 1
+                if dely >= 0:
+                    self.rect.centery -= 1
+                    colY -= 1
+                elif dely < 0:
+                    self.rect.centery += 1
+                    colY += 1
+            if colX >= colY:
+                if not self.noMove:
+                    print("moving Y by " + str(dely))
+                    self.rect.centery += 2
+                self.tempseenY = self.lastSeenY
+                self.tempseenX = self.rect.centerx
+            elif colX < colY:
+                if not self.noMove:
+                    print("moving X by " + str(delx))
+                    self.rect.centerx += 2
+                self.tempseenY = self.rect.centery
+                self.tempseenX = self.lastSeenX
 
 
 dave = Enemy()
