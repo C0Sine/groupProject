@@ -50,7 +50,7 @@ testMap = Map()
 
 testMap.loadMap('map1.txt')
 
-temp = surface.copy()
+temp = pygame.Surface((800,800),pygame.SRCALPHA)
 temp.convert_alpha()
 
 
@@ -112,7 +112,7 @@ class LightSource():
 
         self.points.append(self.location)
 
-        temp.fill((0, 0, 0, 255))
+        temp.fill((0, 0, 0, 230))
         pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
         pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
 
@@ -245,8 +245,8 @@ while True:
     #         player.rect.y = player.oldY
 
 
-    source.drawLights()
     surface.blit(testMap.image, (0, 0))
+    source.drawLights()
     surface.blit(player.image, player.rect)
     surface.blit(update_fps(), (10, 0))
     pygame.display.update()
