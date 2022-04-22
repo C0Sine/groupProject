@@ -152,22 +152,31 @@ class Menu:
         self.isTitle=isTitle
         self.itemSize=itemSize
         self.items=items
-        displace=0
-        #if its the main menu put game logo on top and move down options
-        if isTitle:
-            self.output.blit(pygame.image.load("titlescreen.png"),(0,0))
-            displace=400+(self.itemSize/2)
-        for n in range(len(items)):
-            text=self.font.render(items[n],0,textColor)
-            text_rect = text.get_rect(center=(400, (n*itemSize)+displace))
+        self.color=textColor
+        self.create()
+    def create(self):
+        self.output.fill((0,0,0))
+        displace = (self.itemSize / 2)
+        # if its the main menu put game logo on top and move down options
+        if self.isTitle:
+            self.output.blit(pygame.image.load("titlescreen.png"), (0, 0))
+            displace = 400 + (self.itemSize / 2)
+        for n in range(len(self.items)):
+            text = self.font.render(self.items[n], 0, self.color)
+            text_rect = text.get_rect(center=(400, (n * self.itemSize) + displace))
             self.output.blit(text, text_rect)
     def getMenu(self):
         return(self.output)
+    def update(self,items,newSize = None):
+        self.items=items
+        if newSize!=None:
+            self.itemSize=newSize
+        self.create()
     def click(self,pos):
         #finds and returns what item is clicked
         offset=0
         if self.isTitle:
-            offset=400+(self.itemSize/2)
+            offset=400
         itemClicked=int((pos[1]-offset)/self.itemSize)
         if 0>itemClicked>=len(self.items) or 200>pos[0] or 600<pos[0]:
             itemClicked=None
@@ -190,6 +199,7 @@ playerspeed = 3
 gaming=False
 
 menu=Menu(["Play","Close","Credits"],True,50,(255,255,255))
+currentMenu=menu
 while True:
     surface.fill((255, 255, 255))
     player.oldX, player.oldY = player.rect[0], player.rect[1]
@@ -200,17 +210,23 @@ while True:
             pygame.quit()
             print('l8r sk8r')
             sys.exit()
-        if event.type == pygame.MOUSEBUTTONUP:
+        if event.type == pygame.MOUSEBUTTONUP and not gaming: #menu click handling
             pos = pygame.mouse.get_pos()
-            item=menu.click(pos)
+            item=currentMenu.click(pos)
             if item==0:
-                gaming=True
+                if currentMenu==menu:
+                    gaming=True
+                    currentMenu=None
             elif item==1:
-                pygame.quit()
-                print('l8r sk8r')
-                sys.exit()
+                if currentMenu == menu:
+                    pygame.quit()
+                    print('l8r sk8r')
+                    sys.exit()
             elif item==2:
-                print("credits coming soon")
+                if currentMenu == menu:
+                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude:(what jude did)","Rowen:(what rowen did)","Back"],False,50,(255,255,255))
+                    currentMenu=credits
+
     if gaming:    # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
             player.updatePosition(0 - round(playerspeed * 0.707), 0)
@@ -283,6 +299,6 @@ while True:
         surface.blit(player.image, player.rect)
         source.drawLights()
     else:
-        surface.blit(menu.getMenu(),(0,0))
+        surface.blit(currentMenu.getMenu(),(0,0))
     pygame.display.update()
     fpsClock.tick(FPS)
