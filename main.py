@@ -256,7 +256,6 @@ while True:
                 source.changeLocation(player.rect.centerx, player.rect.centery)
                 print('change')
 
-
     if mouse_x > player.rect.x + (player.rect.width / 2):
         target_angle = 270 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
     elif mouse_x < player.rect.x + (player.rect.width / 2):
