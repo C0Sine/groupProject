@@ -210,6 +210,7 @@ frame = 0
 mouse_x, mouse_y = 0, 0
 player_angle = 0
 target_angle = 0
+
 while True:
     frame += 1
     surface.fill((255, 255, 255))
@@ -280,25 +281,20 @@ while True:
 
     if player_angle < 0:
         player_angle += 360
-        print("flip")
 
     if player_angle > 359:
         player_angle -= 360
-        print("FLIP")
 
     if mouse_x > player.rect.x + (player.rect.width / 2):
         target_angle = 270 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
     elif mouse_x < player.rect.x + (player.rect.width / 2):
         target_angle = 90 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
 
-    #print(f"angle: {player_angle} target: {target_angle}")
     if player_angle < 90 and target_angle > 270:
         player_angle -= (player_angle - target_angle) % 360 / 10
-        #print("WORKS")
 
     elif player_angle > 270 and target_angle < 90:
         player_angle += (target_angle - player_angle) % 360 / 10
-        print("works")
 
     else:
         player_angle -= (player_angle - target_angle) / 10
