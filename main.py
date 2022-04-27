@@ -80,7 +80,7 @@ testMap = IndoorMap()
 
 testMap.loadMap('map1.txt')
 
-temp = surface.copy()
+temp = pygame.Surface((800,800),pygame.SRCALPHA)
 temp.convert_alpha()
 
 
@@ -147,7 +147,7 @@ class LightSource():
 
         self.points.append(self.location)
 
-        temp.fill((0, 0, 0, 255))
+        temp.fill((0, 0, 0, 230))
         pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
         pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
 
@@ -278,12 +278,28 @@ while True:
                     player.updateCollisionPosition('Up')
                 source.changeLocation(player.rect.centerx, player.rect.centery)
 
+    if player_angle < 0:
+        player_angle += 360
+        print("flip")
+
+    if player_angle > 359:
+        player_angle -= 360
+        print("FLIP")
+
     if mouse_x > player.rect.x + (player.rect.width / 2):
         target_angle = 270 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
     elif mouse_x < player.rect.x + (player.rect.width / 2):
         target_angle = 90 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
+
+    #print(f"angle: {player_angle} target: {target_angle}")
     if player_angle < 90 and target_angle > 270:
-        player_angle -= (player_angle - target_angle) / 10
+        player_angle -= (player_angle - target_angle) % 360 / 10
+        #print("WORKS")
+
+    elif player_angle > 270 and target_angle < 90:
+        player_angle += (target_angle - player_angle) % 360 / 10
+        print("works")
+
     else:
         player_angle -= (player_angle - target_angle) / 10
 
