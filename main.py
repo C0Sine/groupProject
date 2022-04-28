@@ -309,7 +309,6 @@ while True:
     source.drawLights()
     surface.blit(testMap.image, (0, 0))
     blitRotate(surface, player.image, (player.imageX, player.imageY), player_angle)
-    source.drawLights()
     surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
