@@ -19,7 +19,37 @@ def update_fps():
     fps = str(int(fpsClock.get_fps()))
     fps_text = font.render(fps, 1, pygame.Color("coral"))
     return fps_text
-class Map(pygame.sprite.Sprite):
+
+
+class Chunk():
+    def __init__(self, var, rotation):
+        self.var = var
+        self.rotation = rotation
+
+    def __str__(self):
+        return str(self.var) + ' ' + str(self.rotation)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class OutdoorMap():
+    def __init__(self):
+        mapsize = 5
+        self.map_array = []
+        for i in range(mapsize):
+            current_array = []
+            for j in range(mapsize):
+                current_array.append(Chunk(random.randint(0, 9), random.randint(0, 3)))
+            self.map_array.append(current_array.copy())
+        key_loc = random.randint(0, mapsize - 1), random.randint(0, mapsize - 1)
+        self.map_array[key_loc[0]][key_loc[1]] = Chunk(10, 0)
+        print(self.map_array)
+
+map = OutdoorMap()
+
+
+class IndoorMap(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(pygame.image.load('wallTest.png'), (800, 800))
@@ -45,7 +75,8 @@ class Map(pygame.sprite.Sprite):
         self.rect = self.mask.get_rect()
 
 
-testMap = Map()
+
+testMap = IndoorMap()
 
 testMap.loadMap('map1.txt')
 
@@ -85,7 +116,8 @@ class LightSource():
     def calculateLights(self):
         self.points = []
 
-        for angle in range(self.direction, self.direction + self.width + 1):
+        angle = self.direction
+        while angle < self.direction + self.width + 1:
             point = [-1, -1]  # stores current point
             lastLocation = [-1, -1]  # stores previous point so if point is in a wall
             lastLocation[0] = self.location[0]
@@ -101,13 +133,14 @@ class LightSource():
                 lastLocation[0] = point[0]
                 lastLocation[1] = point[1]
 
-                if testMap.mask.get_at(point) != 0:
+                if testMap.mask.get_at(point) != 0 or len > self.strength:
 
                     self.points.append(lastLocation)
                     run = False
 
                 else:  # Increment Len
                     len += 10 #change it to 2 and then check the point behind it if it detects a wall
+            angle += 1
 
     def drawLights(self):
         # Drawns ligns from start location to the edge points
@@ -121,6 +154,7 @@ class LightSource():
         surface.blit(temp, (0, 0))
 
     #def makeLayer(self):
+
 
 
 class Player(pygame.sprite.Sprite):
@@ -168,7 +202,7 @@ def blitRotate(surf, image, topleft, angle):
 
 player = Player()
 
-source = LightSource([player.rect.centerx, player.rect.centery], 155, 60)
+source = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
 source.calculateLights()
 
 player_speed = 3
@@ -198,7 +232,6 @@ while True:
             if pygame.sprite.collide_mask(player, testMap):
                 player.updateCollisionPosition('Up')
             source.changeLocation(player.rect.centerx, player.rect.centery)
-            print('change')
         elif (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('s') or keyboard.is_pressed('Down')):  # Diagonal movement
             player.updatePosition(0 - round(player_speed * 0.707), 0)
             if pygame.sprite.collide_mask(player, testMap):
@@ -207,7 +240,6 @@ while True:
             if pygame.sprite.collide_mask(player, testMap):
                 player.updateCollisionPosition('Down')
             source.changeLocation(player.rect.centerx, player.rect.centery)
-            print('change')
         elif (keyboard.is_pressed('d') or keyboard.is_pressed('Right')) and (keyboard.is_pressed('s') or keyboard.is_pressed('Down')):  # Diagonal movement
             player.updatePosition(player_speed * 0.707, 0)
             if pygame.sprite.collide_mask(player, testMap):
@@ -216,7 +248,6 @@ while True:
             if pygame.sprite.collide_mask(player, testMap):
                 player.updateCollisionPosition('Down')
             source.changeLocation(player.rect.centerx, player.rect.centery)
-            print('change')
         elif (keyboard.is_pressed('d') or keyboard.is_pressed('Right')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):  # Diagonal movement
             player.updatePosition(player_speed * 0.707, 0)
             if pygame.sprite.collide_mask(player, testMap):
@@ -225,34 +256,27 @@ while True:
             if pygame.sprite.collide_mask(player, testMap):
                 player.updateCollisionPosition('Up')
             source.changeLocation(player.rect.centerx, player.rect.centery)
-            print('change')
         else:
             if keyboard.is_pressed('a') or keyboard.is_pressed('Left'):  # Cardinal movement
                 player.updatePosition(-player_speed, 0)
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Left')
                 source.changeLocation(player.rect.centerx, player.rect.centery)
-                print('change')
             if keyboard.is_pressed('d') or keyboard.is_pressed('Right'):    # Cardinal movement
                 player.updatePosition(player_speed, 0)
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Right')
                 source.changeLocation(player.rect.centerx, player.rect.centery)
-                print('change')
             if keyboard.is_pressed('s') or keyboard.is_pressed('Down'):  # Cardinal movement
                 player.updatePosition(0, player_speed)
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Down')
                 source.changeLocation(player.rect.centerx, player.rect.centery)
-                print('change')
             if keyboard.is_pressed('w') or keyboard.is_pressed('Up'):   # Cardinal movement
                 player.updatePosition(0, -player_speed)
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Up')
                 source.changeLocation(player.rect.centerx, player.rect.centery)
-                print('change')
-
-    surface.blit(testMap.image, (0, 0))
 
     if player_angle < 0:
         player_angle += 360
@@ -282,6 +306,8 @@ while True:
     if int(player_angle) != int(target_angle):
         source.changeDirection(int(-(source.width / 2) - player_angle - 90))
 
+    source.drawLights()
+    surface.blit(testMap.image, (0, 0))
     blitRotate(surface, player.image, (player.imageX, player.imageY), player_angle)
     source.drawLights()
     surface.blit(update_fps(), (10, 0))
