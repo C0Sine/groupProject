@@ -56,21 +56,21 @@ class IndoorMap(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.mask.get_rect()
 
-    def loadMap(self, file):  # takes text file of map
+    def loadMap(self, file):    # takes text file of map
         with open(file) as ins:
             arr = []
-            for line in ins:  # creates an array based on the text file
+            for line in ins:    # creates an array based on the text file
                 number_strings = line.split()
                 numbers = [n for n in number_strings]
                 arr.append(numbers)
-        tempsurf = pygame.Surface((len(arr[0]) * 25, len(arr) * 25))  # surface for walls
+        tempsurf = pygame.Surface((len(arr[0]) * 25, len(arr) * 25))    # surface for walls
         tempsurf.fill((255, 255, 255))  # whitespace will be non-collideable
-        for i in range(0, len(arr)):  # parses array to create walls on tempsurf
+        for i in range(0, len(arr)):    # parses array to create walls on tempsurf
             for j in range(0, len(arr[0])):
-                if arr[i][j] == 'x':  # x is used to assign a wall, any other character works for empty space
+                if arr[i][j] == 'x':    # x is used to assign a wall, any other character works for empty space
                     pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
         tempsurf.set_colorkey((255, 255, 255))  # sets white to transparent, allowing movement in those areas
-        self.image = tempsurf  # sets map to the loaded map
+        self.image = tempsurf   # sets map to the loaded map
         self.mask = pygame.mask.from_surface(tempsurf)
         self.rect = self.mask.get_rect()
 
@@ -80,8 +80,7 @@ testMap = IndoorMap()
 
 testMap.loadMap('map1.txt')
 
-temp = pygame.Surface((800,800),pygame.SRCALPHA)
-temp.convert_alpha()
+
 
 
 class WallTest(pygame.sprite.Sprite):
@@ -91,9 +90,8 @@ class WallTest(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.mask.get_rect()
 
-
-weirdWall = WallTest()
-weirdWall.rect.x, weirdWall.rect.y = 100, 100
+temp = pygame.Surface((800,800),pygame.SRCALPHA)
+temp.convert_alpha()
 
 class LightSource():
     def __init__(self, location, direction, width, strength=None):
@@ -151,7 +149,7 @@ class LightSource():
         pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
         pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
 
-        surface.blit(temp, (0, 0))
+        surface.blit(temp, (400-player.imageX, 400-player.imageY))
 
     #def makeLayer(self):
 
@@ -437,16 +435,16 @@ while True:
 
     if player_angle < 0:
         player_angle += 360
-        print("flip")
+        #print("flip")
 
     if player_angle > 359:
         player_angle -= 360
-        print("FLIP")
+        #print("FLIP")
 
-    if mouse_x > player.rect.x + (player.rect.width / 2):
-        target_angle = 270 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
-    elif mouse_x < player.rect.x + (player.rect.width / 2):
-        target_angle = 90 - math.degrees(math.atan((mouse_y - player.rect.y - (player.rect.height / 2)) / (mouse_x - player.rect.x - (player.rect.width / 2))))
+    if mouse_x > 400 + (player.rect.width / 2):
+        target_angle = 270 - math.degrees(math.atan((mouse_y - 400 - (player.rect.height / 2)) / (mouse_x - 400 - (player.rect.width / 2))))
+    elif mouse_x < 400 + (player.rect.width / 2):
+        target_angle = 90 - math.degrees(math.atan((mouse_y - 400 - (player.rect.height / 2)) / (mouse_x - 400 - (player.rect.width / 2))))
 
     #print(f"angle: {player_angle} target: {target_angle}")
     if player_angle < 90 and target_angle > 270:
@@ -455,18 +453,18 @@ while True:
 
     elif player_angle > 270 and target_angle < 90:
         player_angle += (target_angle - player_angle) % 360 / 10
-        print("works")
+        #print("works")
 
     else:
         player_angle -= (player_angle - target_angle) / 10
 
     if int(player_angle) != int(target_angle):
         source.changeDirection(int(-(source.width / 2) - player_angle - 90))
-
+    surface.fill((25, 25, 25))
+    pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
     source.drawLights()
-    surface.blit(testMap.image, (0, 0))
-    blitRotate(surface, player.image, (player.imageX, player.imageY), player_angle)
-    surface.blit(dave.image, dave.rect)
+    surface.blit(testMap.image, (400-player.imageX, 400-player.imageY))
+    blitRotate(surface, player.image, (400,400), player_angle)
     surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
