@@ -14,17 +14,41 @@ FPS = 60
 # maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
 # mask = pygame.mask.from_surface(maskimage)
 
-font = pygame.font.SysFont("Jokerman", 30)
+font = pygame.font.SysFont("Arial", 20)
+
+
 def update_fps():
     fps = str(int(fpsClock.get_fps()))
     fps_text = font.render(fps, 1, pygame.Color("coral"))
     return fps_text
 
 
+def parse_file(file):
+    with open(file) as ins:
+        arr = []
+        for line in ins:  # creates an array based on the text file
+            number_strings = line.split()
+            numbers = [n for n in number_strings]
+            arr.append(numbers)
+    return arr
+
+
 class Chunk():
     def __init__(self, var, rotation):
         self.var = var
         self.rotation = rotation
+
+        self.area = parse_file('chunk' + str(var) + '.txt')
+
+    def blit_chunk(self, x, y):
+        tempsurf = pygame.Surface(800, 800)
+        for i in range(32):
+            for j in range(32):
+                if self.area[i][j] == 'o':
+                    pygame.draw.rect(tempsurf, (j * 32, i * 32), 25, 25)
+                elif self.area[i][j] == 't':
+                    pygame.draw.rect(tempsurf, (j * 32, i * 32), 50, 50)
+        surface.blit(tempsurf, (x, y))
 
     def __str__(self):
         return str(self.var) + ' ' + str(self.rotation)
@@ -35,15 +59,15 @@ class Chunk():
 
 class OutdoorMap():
     def __init__(self):
-        mapsize = 5
+        mapsize = 8
         self.map_array = []
         for i in range(mapsize):
             current_array = []
             for j in range(mapsize):
-                current_array.append(Chunk(random.randint(0, 9), random.randint(0, 3)))
+                current_array.append(Chunk(random.randint(0, 0), random.randint(0, 3)))
             self.map_array.append(current_array.copy())
-        key_loc = random.randint(0, mapsize - 1), random.randint(0, mapsize - 1)
-        self.map_array[key_loc[0]][key_loc[1]] = Chunk(10, 0)
+        # key_loc = random.randint(0, mapsize - 1), random.randint(0, mapsize - 1)
+        # self.map_array[key_loc[0]][key_loc[1]] = Chunk(10, 0)
         print(self.map_array)
 
 map = OutdoorMap()
@@ -57,12 +81,7 @@ class IndoorMap(pygame.sprite.Sprite):
         self.rect = self.mask.get_rect()
 
     def loadMap(self, file):    # takes text file of map
-        with open(file) as ins:
-            arr = []
-            for line in ins:    # creates an array based on the text file
-                number_strings = line.split()
-                numbers = [n for n in number_strings]
-                arr.append(numbers)
+        arr = parse_file(file)
         tempsurf = pygame.Surface((len(arr[0]) * 25, len(arr) * 25))    # surface for walls
         tempsurf.fill((255, 255, 255))  # whitespace will be non-collideable
         for i in range(0, len(arr)):    # parses array to create walls on tempsurf
@@ -76,9 +95,9 @@ class IndoorMap(pygame.sprite.Sprite):
 
 
 
-testMap = IndoorMap()
+testMap = OutdoorMap()
 
-testMap.loadMap('map1.txt')
+# testMap.loadMap('map1.txt')
 
 temp = pygame.Surface((800,800),pygame.SRCALPHA)
 temp.convert_alpha()
