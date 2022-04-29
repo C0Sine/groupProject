@@ -216,29 +216,34 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(pygame.image.load('fakeEnemy.png'), (40, 40))
-        self.mask = pygame.mask.from_surface(self.image)
+        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (35, 35))
+        self.mask = pygame.mask.from_surface(self.hitbox)
         self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
         self.noMove = False
+        self.xcol = False
+        self.ycol = False
         self.tempseenX, self.tempseenY = 0, 0
 
     def goToLastSeen(self, LOSCoords, Target):  # Requires a True/False input from checkLOS AND a target
         moveX, moveY = 0, 0
         if not LOSCoords[0]:
-            print("Moving to LOS")
+            #print("Moving to LOS")
             self.noMove = False
             moveX = Target.rect.centerx - self.rect.centerx  # Creates an X difference to move along
             moveY = Target.rect.centery - self.rect.centery  # Creates a Y difference to move along
             self.lastSeenX = LOSCoords[1]  # Store last seen location
             self.lastSeenY = LOSCoords[2]
+            #pygame.draw.line(surface, (0, 0, 0), (Target.rect.centerx, Target.rect.centery), (self.rect.centerx, self.rect.centery))
         if LOSCoords[0] and not self.noMove:
-            print("Moving to LAST SEEN")
-            pygame.draw.circle(surface, (0, 255, 0), (self.lastSeenX, self.lastSeenY), 4)
+            #print("Moving to LAST SEEN")
+            #pygame.draw.circle(surface, (0, 255, 0), (self.lastSeenX, self.lastSeenY), 4)
             moveX = self.lastSeenX - self.rect.centerx  # If there is NO LOS, move to last seen X and Y
             moveY = self.lastSeenY - self.rect.centery
+            #pygame.draw.line(surface, (0, 0, 0), (self.lastSeenX, self.lastSeenY), (self.rect.centerx, self.rect.centery))
         elif LOSCoords[0] and self.noMove:  # If movement is blocked, move to a direction cardinal to the last Seen
-            print("Moving to Temp")
-            pygame.draw.circle(surface, (255, 0, 0), (self.tempseenX, self.tempseenY), 4)
+            #print("Moving to Temp")
+            #pygame.draw.circle(surface, (255, 0, 0), (self.tempseenX, self.tempseenY), 4)
             moveX = self.tempseenX - self.rect.centerx
             moveY = self.tempseenY - self.rect.centery
             if moveX == 0 and moveY == 0:
@@ -275,38 +280,31 @@ class Enemy(pygame.sprite.Sprite):
             delx, dely = 0, 0
 
         #print(math.sqrt(math.pow(delx, 2) + math.pow(dely, 2)))
-        self.rect.centerx += delx
-        self.rect.centery += dely
-
-        if pygame.sprite.collide_mask(self, testMap):
-            if LOSCoords[0]:
-                self.noMove = True
-            colX, colY = 0, 0
-            while pygame.sprite.collide_mask(self, testMap):
-                if delx >= 0:
-                    self.rect.centerx -= 1
-                    colX -= 1
-                elif delx < 0:
-                    self.rect.centerx += 1
-                    colX += 1
-                if dely >= 0:
-                    self.rect.centery -= 1
-                    colY -= 1
-                elif dely < 0:
-                    self.rect.centery += 1
-                    colY += 1
-            if colX >= colY:
-                if not self.noMove:
-                    print("moving Y by " + str(dely))
-                    self.rect.centery += 2
-                self.tempseenY = self.lastSeenY
-                self.tempseenX = self.rect.centerx
-            elif colX < colY:
-                if not self.noMove:
-                    print("moving X by " + str(delx))
-                    self.rect.centerx += 2
-                self.tempseenY = self.rect.centery
-                self.tempseenX = self.lastSeenX
+        self.xcol, self.ycol = False, False
+        self.rect.centerx += round(delx)
+        if pygame.sprite.collide_mask(self, testMap):  # Move in x direction, move back if col
+            self.xcol = True
+            self.rect.centerx -= round(delx)
+            #print("X collision moved back x")
+        self.rect.centery += round(dely)
+        # if self.xcol:  # Move in y directoin
+        #     self.rect.centery += 2  # Move 2 if no horizontal movement
+        # else:
+        #     self.rect.centery += round(dely)  # Move x and y
+        #     print("ADD DELY")
+        if pygame.sprite.collide_mask(self, testMap):  # Check collision for y
+            self.ycol = True
+            #print("Y collision moved back y")
+            if self.xcol:
+                self.rect.centery -= 2  # Move back 2 if moved forward 2
+                #print("SUB  NEG 2")
+            else:
+                self.rect.centery -= round(dely)  # Move back dely if moved dely
+                #print("SUB DELY")
+        # if not self.ycol and not self.xcol:
+        #     #print("Moved X AND Y")
+        # if self.xcol and not self.ycol:
+        #     #print("Moved Y but not X")
 
 
 dave = Enemy()
@@ -343,7 +341,7 @@ class LOSBullet(pygame.sprite.Sprite):
                 self.image = pygame.transform.scale(pygame.image.load('LOSBroken.png'), (
                 10, 10))  # Make it so the colliding bullets and everything past appear red
 
-            surface.blit(self.image, self.rect)  # Blit an individual bullet, not needed unless testing
+            #surface.blit(self.image, self.rect)  # Blit an individual bullet, not needed unless testing
 
             if pygame.sprite.collide_mask(self, self.target) and not lostLOS:
                 self.image = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (10, 10))
@@ -354,7 +352,7 @@ class LOSBullet(pygame.sprite.Sprite):
 
 daveLOS = LOSBullet(dave, player)
 source = LightSource([player.rect.centerx, player.rect.centery], 155, 30)
-source.calculateLights()
+#source.calculateLights()
 
 # Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
@@ -468,6 +466,7 @@ while True:
     source.drawLights()
     surface.blit(testMap.image, (0, 0))
     blitRotate(surface, player.image, (player.imageX, player.imageY), player_angle)
+    surface.blit(dave.image, dave.rect)
     surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
