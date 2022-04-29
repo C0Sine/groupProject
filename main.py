@@ -147,7 +147,8 @@ class Player(pygame.sprite.Sprite):
 #Menu class
 class Menu:
     output=pygame.Surface((800,800))
-    def __init__(self,items,isTitle,itemSize,textColor):
+    def __init__(self,items,isTitle,itemSize,textColor,name):
+        self.name=name
         self.font = pygame.font.SysFont('arial', itemSize)
         self.isTitle=isTitle
         self.itemSize=itemSize
@@ -198,7 +199,8 @@ playerspeed = 3
 #game pause variable
 gaming=False
 
-menu=Menu(["Play","Close","Credits"],True,50,(255,255,255))
+menu=Menu(["Play","Close","Credits"],True,50,(255,255,255),"main")
+credits=None
 currentMenu=menu
 while True:
     surface.fill((255, 255, 255))
@@ -224,8 +226,12 @@ while True:
                     sys.exit()
             elif item==2:
                 if currentMenu == menu:
-                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude:(what jude did)","Rowen:(what rowen did)","Back"],False,50,(255,255,255))
+                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude:(what jude did)","Rowen:(what rowen did)","Back"],False,50,(255,255,255),"credits")
                     currentMenu=credits
+            elif item==4:
+                if currentMenu == credits:
+                    currentMenu=menu
+                    print("aaa")
 
     if gaming:    # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
@@ -300,5 +306,6 @@ while True:
         source.drawLights()
     else:
         surface.blit(currentMenu.getMenu(),(0,0))
+        print(currentMenu.name)
     pygame.display.update()
     fpsClock.tick(FPS)
