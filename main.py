@@ -306,7 +306,7 @@ class Enemy(pygame.sprite.Sprite):
 
 
 dave = Enemy()
-dave.rect.x, dave.rect.y = 200, 200
+dave.rect.x, dave.rect.y = 0, 0
 
 player = Player()
 
@@ -464,7 +464,8 @@ while True:
     pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
     source.drawLights()
     surface.blit(testMap.image, (400-player.imageX, 400-player.imageY))
-    blitRotate(surface, player.image, (400,400), player_angle)
+    surface.blit(dave.image, (400 - dave.rect.x, 400 - dave.rect.y))
+    blitRotate(surface, player.image, (400, 400), player_angle)
     surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
