@@ -45,7 +45,7 @@ class OutdoorMap():
             self.map_array.append(current_array.copy())
         key_loc = random.randint(0, mapsize - 1), random.randint(0, mapsize - 1)
         self.map_array[key_loc[0]][key_loc[1]] = Chunk(10, 0)
-        print(self.map_array)
+        #print(self.map_array)
 
 map = OutdoorMap()
 
@@ -198,8 +198,7 @@ def blitRotate(surf, image, topleft, angle):
 #Menu class
 class Menu:
     output=pygame.Surface((800,800))
-    def __init__(self,items,isTitle,itemSize,textColor,name):
-        self.name=name
+    def __init__(self,items,isTitle,itemSize,textColor):
         self.font = pygame.font.SysFont('arial', itemSize)
         self.isTitle=isTitle
         self.itemSize=itemSize
@@ -251,7 +250,7 @@ target_angle = 0
 #game pause variable
 gaming=False
 
-menu=Menu(["Play","Close","Credits"],True,50,(255,255,255),"main")
+menu=Menu(["Play","Close","Credits"],True,50,(255,255,255))
 credits=None
 currentMenu=menu
 while True:
@@ -271,17 +270,18 @@ while True:
                     gaming=True
                     currentMenu=None
             elif item==1:
-                if currentMenu == menu:
+                if currentMenu==menu:
                     pygame.quit()
                     print('l8r sk8r')
                     sys.exit()
             elif item==2:
-                if currentMenu == menu:
-                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude:(what jude did)","Rowen:(what rowen did)","Back"],False,50,(255,255,255),"credits")
+                if currentMenu==menu:
+                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude:(what jude did)","Rowen:(what rowen did)","Back"],False,50,(255,255,255))
                     currentMenu=credits
             elif item==4:
-                if currentMenu == credits:
+                if currentMenu==credits:
                     currentMenu=menu
+                    currentMenu.create()
                     print("aaa")
         if event.type == pygame.MOUSEMOTION:
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -369,10 +369,13 @@ while True:
     if int(player_angle) != int(target_angle):
         source.changeDirection(int(-(source.width / 2) - player_angle - 90))
     surface.fill((25, 25, 25))
-    pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
-    source.drawLights()
-    surface.blit(testMap.image, (400-player.imageX, 400-player.imageY))
-    blitRotate(surface, player.image, (400,400), player_angle)
+    if gaming:
+        pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
+        source.drawLights()
+        surface.blit(testMap.image, (400-player.imageX, 400-player.imageY))
+        blitRotate(surface, player.image, (400,400), player_angle)
+    else:
+        surface.blit(currentMenu.getMenu(),(0,0))
     surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
