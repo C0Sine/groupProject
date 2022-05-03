@@ -119,13 +119,56 @@ class Flashlight:
     def getTicks(self):
         return self.ticks
 
+    def type(self):
+        return "flashlight"
+
+
+class Blank:
+
+    def __init__(self):
+        self.blank = True
+
+    def type(self):
+        return "blank"
+
 
 class Inventory:
     def __init__(self):
-        self.items = ["", "", "", "", "", "", "", "", ""]
+        self.items = [Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank()]
+
+    def appendObject(self, obj):
+        for i in range(0, 9):
+            if self.items[i].type() == "blank":
+                self.items[i] = obj
+                break
 
     def blitInventory(self):
-        pass
+        x = 50
+        y = 50
+        for i in range(1, 10):
+
+            pygame.draw.rect(surface, (100, 100, 100), (x, y, 75, 75))
+            pygame.draw.rect(surface, (50, 50, 50), (x + 7, y + 7, 61, 61))
+
+            x += 100
+            if i % 3 == 0:
+                y += 100
+                x = 50
+
+        x = 50
+        y = 50
+
+        for item in self.items:
+            if item.type() == "flashlight":
+                pygame.draw.rect(surface, (20, 20, 20), (x + 20, y + 10, 35, 15))
+                pygame.draw.rect(surface, (20, 20, 20), (x + 30, y + 25, 15, 40))
+                print("DREW")
+
+                x += 100
+                if i % 3 == 0:
+                    y += 100
+                    x = 50
+
 
 class LightSource:
     def __init__(self, location, direction, width, strength=None):
@@ -255,6 +298,7 @@ target_angle = 0
 
 inv = False
 inventory = Inventory()
+inventory.appendObject(flashlight)
 
 while True:
     frame += 1
