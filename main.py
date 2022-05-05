@@ -15,10 +15,10 @@ pygame.font.init()
 # maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
 # mask = pygame.mask.from_surface(maskimage)
 
-font = pygame.font.SysFont("Jokerman", 30)
+font = pygame.font.SysFont("Arial", 15)
 def update_fps():
     fps = str(int(fpsClock.get_fps()))
-    fps_text = font.render(fps, 1, pygame.Color("coral"))
+    fps_text = font.render(fps, 1, pygame.Color("white"))
     return fps_text
 
 
@@ -376,6 +376,6 @@ while True:
         blitRotate(surface, player.image, (400,400), player_angle)
     else:
         surface.blit(currentMenu.getMenu(),(0,0))
-    surface.blit(update_fps(), (10, 0))
+    surface.blit(update_fps(), (10, 10))
     pygame.display.update()
     fpsClock.tick(FPS)
