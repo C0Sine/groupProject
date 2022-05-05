@@ -44,7 +44,7 @@ class OutdoorMap():
             self.map_array.append(current_array.copy())
         key_loc = random.randint(0, mapsize - 1), random.randint(0, mapsize - 1)
         self.map_array[key_loc[0]][key_loc[1]] = Chunk(10, 0)
-        print(self.map_array)
+        #print(self.map_array)
 
 map = OutdoorMap()
 
@@ -77,7 +77,6 @@ class IndoorMap(pygame.sprite.Sprite):
 
 
 testMap = IndoorMap()
-
 testMap.loadMap('map1.txt')
 
 
@@ -149,7 +148,7 @@ class LightSource():
         pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
         pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
 
-        surface.blit(temp, (400-player.imageX, 400-player.imageY))
+        surface.blit(temp, (400 - player.imageX, 400 - player.imageY))
 
     #def makeLayer(self):
 
@@ -225,6 +224,7 @@ class Enemy(pygame.sprite.Sprite):
 
     def goToLastSeen(self, LOSCoords, Target):  # Requires a True/False input from checkLOS AND a target
         moveX, moveY = 0, 0
+        #print("daveRectX = " + str(self.rect.x) + ", daveRectY = " + str(self.rect.y))
         if not LOSCoords[0]:
             #print("Moving to LOS")
             self.noMove = False
@@ -306,7 +306,7 @@ class Enemy(pygame.sprite.Sprite):
 
 
 dave = Enemy()
-dave.rect.x, dave.rect.y = 0, 0
+dave.rect.x, dave.rect.y = 80, 80
 
 player = Player()
 
@@ -325,8 +325,12 @@ class LOSBullet(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(pygame.image.load('LOSTest.png'),
                                             (10, 10))  # Ensures the default image is a black 10x10 square
         self.rect.center = self.origin.rect.center
+        #print("origin center = " + str(self.origin.rect.center))
         moveX = self.target.rect.centerx - self.rect.centerx  # Creates the X component of the "slope"
         moveY = self.target.rect.centery - self.rect.centery  # Creates the Y component of the "slope"
+        # print("moveX = " + str(moveX))
+        # print("moveY = " + str(moveY))
+        #print("Target Center = " + str(player.rect.center))
         lostLOS = False  # A variable that will read TRUE if line of sight is ever broken
 
         for i in range(25):  # Create and check 25 points
@@ -339,11 +343,12 @@ class LOSBullet(pygame.sprite.Sprite):
                 self.image = pygame.transform.scale(pygame.image.load('LOSBroken.png'), (
                 10, 10))  # Make it so the colliding bullets and everything past appear red
 
-            #surface.blit(self.image, self.rect)  # Blit an individual bullet, not needed unless testing
+            #surface.blit(self.image, ((400 - player.imageX) + self.rect.x, (400 - player.imageY) + self.rect.y))  # Blit an individual bullet, not needed unless testing
 
             if pygame.sprite.collide_mask(self, self.target) and not lostLOS:
                 self.image = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (10, 10))
 
+        #print(lostLOS)
         return [lostLOS, self.target.rect.centerx,
                 self.target.rect.centery]  # Returns True/False based on if LOS was broken and a last seen location
 
@@ -368,7 +373,6 @@ while True:
     frame += 1
     surface.fill((255, 255, 255))
     player.oldX, player.oldY = player.rect[0], player.rect[1]
-    dave.goToLastSeen(daveLOS.checkLOS(), player)
 
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -463,8 +467,9 @@ while True:
     surface.fill((25, 25, 25))
     pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
     source.drawLights()
-    surface.blit(testMap.image, (400-player.imageX, 400-player.imageY))
-    surface.blit(dave.image, (400 - dave.rect.x, 400 - dave.rect.y))
+    surface.blit(testMap.image, (400 - player.imageX, 400 - player.imageY))
+    dave.goToLastSeen(daveLOS.checkLOS(), player)
+    surface.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
     blitRotate(surface, player.image, (400, 400), player_angle)
     surface.blit(update_fps(), (10, 0))
     pygame.display.update()
