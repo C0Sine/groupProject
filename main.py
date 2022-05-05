@@ -10,14 +10,15 @@ surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
 surface.convert_alpha()
 fpsClock = pygame.time.Clock()
 FPS = 60
+pygame.font.init()
 
 # maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
 # mask = pygame.mask.from_surface(maskimage)
 
-font = pygame.font.SysFont("Jokerman", 30)
+font = pygame.font.SysFont("Arial", 15)
 def update_fps():
     fps = str(int(fpsClock.get_fps()))
-    fps_text = font.render(fps, 1, pygame.Color("coral"))
+    fps_text = font.render(fps, 1, pygame.Color("white"))
     return fps_text
 
 
@@ -77,10 +78,8 @@ class IndoorMap(pygame.sprite.Sprite):
 
 
 testMap = IndoorMap()
+
 testMap.loadMap('map1.txt')
-
-
-
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
@@ -307,6 +306,47 @@ class Enemy(pygame.sprite.Sprite):
 
 dave = Enemy()
 dave.rect.x, dave.rect.y = 80, 80
+#Menu class
+class Menu:
+    output=pygame.Surface((800,800))
+    def __init__(self,items,isTitle,itemSize,textColor):
+        self.font = pygame.font.SysFont('arial', itemSize)
+        self.isTitle=isTitle
+        self.itemSize=itemSize
+        self.items=items
+        self.color=textColor
+        self.create()
+    def create(self):
+        self.output.fill((0,0,0))
+        displace = (self.itemSize / 2)
+        # if its the main menu put game logo on top and move down options
+        if self.isTitle:
+            self.output.blit(pygame.image.load("titlescreen.png"), (0, 0))
+            displace = 400 + (self.itemSize / 2)
+        for n in range(len(self.items)):
+            text = self.font.render(self.items[n], 0, self.color)
+            text_rect = text.get_rect(center=(400, (n * self.itemSize) + displace))
+            self.output.blit(text, text_rect)
+    def getMenu(self):
+        return(self.output)
+    def update(self,items,newSize = None):
+        self.items=items
+        if newSize!=None:
+            self.itemSize=newSize
+        self.create()
+    def click(self,pos):
+        #finds and returns what item is clicked
+        offset=0
+        if self.isTitle:
+            offset=400
+        itemClicked=int((pos[1]-offset)/self.itemSize)
+        if 0>itemClicked>=len(self.items) or 200>pos[0] or 600<pos[0]:
+            itemClicked=None
+        return itemClicked
+
+
+
+
 
 player = Player()
 
@@ -369,9 +409,14 @@ frame = 0
 mouse_x, mouse_y = 0, 0
 player_angle = 0
 target_angle = 0
+#game pause variable
+gaming=False
+
+menu=Menu(["Play","Close","Credits"],True,50,(255,255,255))
+credits=None
+currentMenu=menu
 while True:
     frame += 1
-    surface.fill((255, 255, 255))
     player.oldX, player.oldY = player.rect[0], player.rect[1]
 
     for event in pygame.event.get():
@@ -379,10 +424,31 @@ while True:
             pygame.quit()
             print('l8r sk8r')
             sys.exit()
+        if event.type == pygame.MOUSEBUTTONUP and not gaming: #menu click handling
+            pos = pygame.mouse.get_pos()
+            item=currentMenu.click(pos)
+            if item==0:
+                if currentMenu==menu:
+                    gaming=True
+                    currentMenu=None
+            elif item==1:
+                if currentMenu==menu:
+                    pygame.quit()
+                    print('l8r sk8r')
+                    sys.exit()
+            elif item==2:
+                if currentMenu==menu:
+                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude:(what jude did)","Rowen:(what rowen did)","Back"],False,50,(255,255,255))
+                    currentMenu=credits
+            elif item==4:
+                if currentMenu==credits:
+                    currentMenu=menu
+                    currentMenu.create()
+                    print("aaa")
         if event.type == pygame.MOUSEMOTION:
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
-    if True:    # Movement
+    if gaming:    # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
             player.updatePosition(0 - round(player_speed * 0.707), 0)
             if pygame.sprite.collide_mask(player, testMap):
@@ -465,12 +531,15 @@ while True:
     if int(player_angle) != int(target_angle):
         source.changeDirection(int(-(source.width / 2) - player_angle - 90))
     surface.fill((25, 25, 25))
-    pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
-    source.drawLights()
-    surface.blit(testMap.image, (400 - player.imageX, 400 - player.imageY))
-    dave.goToLastSeen(daveLOS.checkLOS(), player)
-    surface.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
-    blitRotate(surface, player.image, (400, 400), player_angle)
-    surface.blit(update_fps(), (10, 0))
+    if gaming:
+        pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
+        source.drawLights()
+        surface.blit(testMap.image, (400 - player.imageX, 400 - player.imageY))
+        dave.goToLastSeen(daveLOS.checkLOS(), player)
+        surface.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
+        blitRotate(surface, player.image, (400, 400), player_angle)
+        surface.blit(update_fps(), (10, 0))
+    else:
+        surface.blit(currentMenu.getMenu(), (0, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
