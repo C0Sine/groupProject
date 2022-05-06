@@ -19,7 +19,7 @@ font = pygame.font.SysFont("Arial", 20)
 
 def update_fps():
     fps = str(int(fpsClock.get_fps()))
-    fps_text = font.render(fps, 1, pygame.Color("coral"))
+    fps_text = font.render(fps, 1, pygame.Color("white"))
     return fps_text
 
 
@@ -95,9 +95,9 @@ class IndoorMap(pygame.sprite.Sprite):
 
 
 
-testMap = OutdoorMap()
+testMap = IndoorMap()
 
-# testMap.loadMap('map1.txt')
+testMap.loadMap('map1.txt')
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
