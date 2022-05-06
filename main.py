@@ -163,10 +163,16 @@ class Inventory:
         self.heldObjectPos = -1
         self.heldObject = Blank()
 
+    def returnObj(self):
+        self.items[self.heldObjectPos] = self.heldObject
+        self.heldObject = Blank()
+        self.heldObjectPos = -1
+
     def holdingObject(self, place):
         self.heldObjectPos = place
         self.heldObject = self.items[place]
-        self.items[place] == Blank()
+        self.items[place] = Blank()
+        print(self.items)
 
     def getHoldPlace(self):
         return self.heldObjectPos
@@ -358,9 +364,7 @@ while True:
             itterationX = 0
             itterationY = 0
             for place in range(0, 9):
-                print(mouse_y)
                 if itterationX < mouse_x < itterationX + 100:
-                    print(itterationY)
                     if itterationY < mouse_y < itterationY + 100:
                         inventory.holdingObject(place)
                         break
@@ -370,10 +374,27 @@ while True:
                     itterationX = 0
                     itterationY += 100
 
+        if event.type == pygame.MOUSEBUTTONUP and inv:
+            itterationX = 0
+            itterationY = 0
+            for place in range(0, 10):
+                if itterationX < mouse_x < itterationX + 100:
+                    if itterationY < mouse_y < itterationY + 100:
+                        inventory.moveObject(place)
+                        break
+
+                if place == 10:
+                    inventory.returnObj()
+
+                itterationX += 100
+                if itterationX == 300:
+                    itterationX = 0
+                    itterationY += 100
+
         if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
             inv = not inv
 
-    if True:    # Movement
+    if True:  # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
             player.updatePosition(0 - round(player_speed * 0.707), 0)
             if pygame.sprite.collide_mask(player, testMap):
@@ -469,8 +490,13 @@ while True:
         source.calculateLights()
 
     if inventory.getHoldPlace() >= 0:
-        pygame.draw.rect(surface, (100, 100, 100), (mouse_x, mouse_y, 100, 100))
-        print("HOLDING")
+        if inventory.getObjectType() == "flashlight":
+            pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 17.5, mouse_y - 7.5, 35, 15))
+            pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 7.5, mouse_y - 20, 15, 40))
+
+        if inventory.getObjectType() == "battery":
+            pygame.draw.rect(surface, (150, 150, 150), (mouse_x - 7.5, mouse_y - 7.5, 15, 15))
+            pygame.draw.rect(surface, (200, 200, 0), (mouse_x - 17.5, mouse_y - 22.5, 35, 45))
 
     pygame.display.update()
     fpsClock.tick(FPS)
