@@ -15,10 +15,10 @@ pygame.font.init()
 # maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
 # mask = pygame.mask.from_surface(maskimage)
 
-font = pygame.font.SysFont("Arial", 15)
+font = pygame.font.SysFont("Jokerman", 30)
 def update_fps():
     fps = str(int(fpsClock.get_fps()))
-    fps_text = font.render(fps, 1, pygame.Color("white"))
+    fps_text = font.render(fps, 1, pygame.Color("coral"))
     return fps_text
 
 
@@ -91,8 +91,9 @@ class WallTest(pygame.sprite.Sprite):
 temp = pygame.Surface((800,800),pygame.SRCALPHA)
 temp.convert_alpha()
 
-class LightSource():
+class LightSource(pygame.sprite.Sprite):
     def __init__(self, location, direction, width, strength=None):
+        pygame.sprite.Sprite.__init__(self)
         # direction and width in degrees
 
         self.location = location
@@ -100,6 +101,8 @@ class LightSource():
         self.width = width
         self.strength = strength
         self.points = []
+        self.mask = None
+        self.rect = None
 
     def changeLocation(self, x, y):
         self.location = [x, y]
@@ -138,16 +141,19 @@ class LightSource():
                     len += 10 #change it to 2 and then check the point behind it if it detects a wall
             angle += 1
 
-    def drawLights(self):
+    def drawLights(self, opacity):
         # Drawns ligns from start location to the edge points
 
         self.points.append(self.location)
 
-        temp.fill((0, 0, 0, 230))
+        temp.fill((0, 0, 0, opacity))
         pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
         pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
 
-        surface.blit(temp, (400 - player.imageX, 400 - player.imageY))
+        self.mask = pygame.mask.from_surface(temp)
+        self.rect = temp.get_rect()
+
+        return temp
 
     #def makeLayer(self):
 
@@ -394,15 +400,13 @@ class LOSBullet(pygame.sprite.Sprite):
 
 
 daveLOS = LOSBullet(dave, player)
-source = LightSource([player.rect.centerx, player.rect.centery], 155, 30)
-#source.calculateLights()
 
 # Fake player is an invisible "Player" used to detect collisions
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
 
-source = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
-source.calculateLights()
+vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
+vision.calculateLights()
 
 player_speed = 3
 frame = 0
@@ -456,7 +460,7 @@ while True:
             player.updatePosition(0, 0 - round(player_speed * 0.707))
             if pygame.sprite.collide_mask(player, testMap):
                 player.updateCollisionPosition('Up')
-            source.changeLocation(player.rect.centerx, player.rect.centery)
+            vision.changeLocation(player.rect.centerx, player.rect.centery)
         elif (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('s') or keyboard.is_pressed('Down')):  # Diagonal movement
             player.updatePosition(0 - round(player_speed * 0.707), 0)
             if pygame.sprite.collide_mask(player, testMap):
@@ -464,7 +468,7 @@ while True:
             player.updatePosition(0, player_speed * 0.707)
             if pygame.sprite.collide_mask(player, testMap):
                 player.updateCollisionPosition('Down')
-            source.changeLocation(player.rect.centerx, player.rect.centery)
+            vision.changeLocation(player.rect.centerx, player.rect.centery)
         elif (keyboard.is_pressed('d') or keyboard.is_pressed('Right')) and (keyboard.is_pressed('s') or keyboard.is_pressed('Down')):  # Diagonal movement
             player.updatePosition(player_speed * 0.707, 0)
             if pygame.sprite.collide_mask(player, testMap):
@@ -472,7 +476,7 @@ while True:
             player.updatePosition(0, player_speed * 0.707)
             if pygame.sprite.collide_mask(player, testMap):
                 player.updateCollisionPosition('Down')
-            source.changeLocation(player.rect.centerx, player.rect.centery)
+            vision.changeLocation(player.rect.centerx, player.rect.centery)
         elif (keyboard.is_pressed('d') or keyboard.is_pressed('Right')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):  # Diagonal movement
             player.updatePosition(player_speed * 0.707, 0)
             if pygame.sprite.collide_mask(player, testMap):
@@ -480,28 +484,28 @@ while True:
             player.updatePosition(0, 0 - round(player_speed * 0.707))
             if pygame.sprite.collide_mask(player, testMap):
                 player.updateCollisionPosition('Up')
-            source.changeLocation(player.rect.centerx, player.rect.centery)
+            vision.changeLocation(player.rect.centerx, player.rect.centery)
         else:
             if keyboard.is_pressed('a') or keyboard.is_pressed('Left'):  # Cardinal movement
                 player.updatePosition(-player_speed, 0)
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Left')
-                source.changeLocation(player.rect.centerx, player.rect.centery)
+                vision.changeLocation(player.rect.centerx, player.rect.centery)
             if keyboard.is_pressed('d') or keyboard.is_pressed('Right'):    # Cardinal movement
                 player.updatePosition(player_speed, 0)
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Right')
-                source.changeLocation(player.rect.centerx, player.rect.centery)
+                vision.changeLocation(player.rect.centerx, player.rect.centery)
             if keyboard.is_pressed('s') or keyboard.is_pressed('Down'):  # Cardinal movement
                 player.updatePosition(0, player_speed)
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Down')
-                source.changeLocation(player.rect.centerx, player.rect.centery)
+                vision.changeLocation(player.rect.centerx, player.rect.centery)
             if keyboard.is_pressed('w') or keyboard.is_pressed('Up'):   # Cardinal movement
                 player.updatePosition(0, -player_speed)
                 if pygame.sprite.collide_mask(player, testMap):
                     player.updateCollisionPosition('Up')
-                source.changeLocation(player.rect.centerx, player.rect.centery)
+                vision.changeLocation(player.rect.centerx, player.rect.centery)
 
     if player_angle < 0:
         player_angle += 360
@@ -529,18 +533,24 @@ while True:
         player_angle -= (player_angle - target_angle) / 10
 
     if int(player_angle) != int(target_angle):
-        source.changeDirection(int(-(source.width / 2) - player_angle - 90))
+        vision.changeDirection(int(-(vision.width / 2) - player_angle - 90))
     surface.fill((25, 25, 25))
     if gaming:
+        tempsurf = pygame.surface.Surface((800, 800))
+        tempsurf.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
+        tempsurf.blit(vision.drawLights(255), (400 - player.imageX, 400 - player.imageY))
+        tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
-        source.drawLights()
+        surface.blit(tempsurf, (0, 0))
+        surface.blit(vision.drawLights(230), (400 - player.imageX, 400 - player.imageY))
         surface.blit(testMap.image, (400 - player.imageX, 400 - player.imageY))
         dave.goToLastSeen(daveLOS.checkLOS(), player)
-        surface.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
+        # if not pygame.sprite.collide_mask(dave, vision):
+        #     surface.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
         blitRotate(surface, player.image, (400, 400), player_angle)
         surface.blit(update_fps(), (10, 0))
     else:
         surface.blit(currentMenu.getMenu(),(0,0))
-    surface.blit(update_fps(), (10, 10))
+    surface.blit(update_fps(), (10, 0))
     pygame.display.update()
     fpsClock.tick(FPS)
