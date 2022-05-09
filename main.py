@@ -235,8 +235,8 @@ def blitRotate(surf, image, topleft, angle):
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('fakeEnemy.png'), (40, 40))
-        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (35, 35))
+        self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
+        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (50, 50))
         self.mask = pygame.mask.from_surface(self.hitbox)
         self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
@@ -244,6 +244,7 @@ class Enemy(pygame.sprite.Sprite):
         self.xcol = False
         self.ycol = False
         self.tempseenX, self.tempseenY = 0, 0
+        self.angle, self.targetAngle = 0, 0
 
     def goToLastSeen(self, LOSCoords, Target):  # Requires a True/False input from checkLOS AND a target
         moveX, moveY = 0, 0
@@ -529,31 +530,49 @@ while True:
         player_angle += 360
         #print("flip")
 
+
+    if dave.angle < 0:
+        dave.angle += 360
+
     if player_angle > 359:
         player_angle -= 360
         #print("FLIP")
+
+    if dave.angle > 359:
+        dave.angle -= 360
 
     if mouse_x > 400 + (player.rect.width / 2):
         target_angle = 270 - math.degrees(math.atan((mouse_y - 400 - (player.rect.height / 2)) / (mouse_x - 400 - (player.rect.width / 2))))
     elif mouse_x < 400 + (player.rect.width / 2):
         target_angle = 90 - math.degrees(math.atan((mouse_y - 400 - (player.rect.height / 2)) / (mouse_x - 400 - (player.rect.width / 2))))
 
+    if player.rect.centerx > dave.rect.centerx:
+        dave.targetAngle = 270 - math.degrees(math.atan((player.rect.centery - dave.rect.centery) / (player.rect.centerx - dave.rect.centerx)))
+    elif player.rect.centerx < dave.rect.centerx:
+        dave.targetAngle = 90 - math.degrees(math.atan((player.rect.centery - dave.rect.centery) / (player.rect.centerx - dave.rect.centerx)))
+
     if player_angle < 90 and target_angle > 270:
         player_angle -= (player_angle - target_angle) % 360 / 10
-
     elif player_angle > 270 and target_angle < 90:
         player_angle += (target_angle - player_angle) % 360 / 10
         #print("works")
-
     else:
         player_angle -= (player_angle - target_angle) / 10
 
+    if dave.angle < 90 and dave.targetAngle > 270:
+        dave.angle -= (dave.angle - dave.targetAngle) % 360 / 10
+    elif dave.angle > 270 and dave.targetAngle < 90:
+        dave.angle += (dave.angle - dave.targetAngle) % 360 / 10
+    else:
+        dave.angle -= (dave.angle - dave.targetAngle) / 10
+
     if int(player_angle) != int(target_angle):
         vision.changeDirection(int(-(vision.width / 2) - player_angle - 90))
+
     surface.fill((25, 25, 25))
     if gaming:
         tempsurf = pygame.surface.Surface((800, 800))
-        tempsurf.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
+        blitRotate(tempsurf, dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y), dave.angle + 90)
         tempsurf.blit(vision.drawLights(255), (400 - player.imageX, 400 - player.imageY))
         tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
