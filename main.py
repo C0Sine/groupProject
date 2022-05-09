@@ -167,18 +167,20 @@ class Inventory:
         self.items[self.heldObjectPos] = self.heldObject
         self.heldObject = Blank()
         self.heldObjectPos = -1
+        print("YEAH BOIIII")
 
     def holdingObject(self, place):
-        self.heldObjectPos = place
-        self.heldObject = self.items[place]
-        self.items[place] = Blank()
-        print(self.items)
+        if not self.items[place].type() == "blank":
+            self.heldObjectPos = place
+            self.heldObject = self.items[place]
+            self.items[place] = Blank()
+            print(self.items)
 
     def getHoldPlace(self):
         return self.heldObjectPos
 
     def getObjectType(self):
-        return self.heldObject
+        return self.heldObject.type()
 
     def blitInventory(self):
         x = 50
@@ -275,7 +277,7 @@ class LightSource:
         self.points.append(self.location)
 
         temp.fill((0, 0, 0, 230))
-        pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
+        pygame.draw.circle(temp, (255, 255, 255, 0), player.rect.center, player.rect.w * 0.75)
         pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
 
         surface.blit(temp, (400-player.imageX, 400-player.imageY))
@@ -361,11 +363,11 @@ while True:
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
         if event.type == pygame.MOUSEBUTTONDOWN and inv:
-            itterationX = 0
-            itterationY = 0
+            itterationX = 50
+            itterationY = 50
             for place in range(0, 9):
-                if itterationX < mouse_x < itterationX + 100:
-                    if itterationY < mouse_y < itterationY + 100:
+                if itterationX < mouse_x < itterationX + 75:
+                    if itterationY < mouse_y < itterationY + 75:
                         inventory.holdingObject(place)
                         break
 
@@ -374,17 +376,20 @@ while True:
                     itterationX = 0
                     itterationY += 100
 
-        if event.type == pygame.MOUSEBUTTONUP and inv:
-            itterationX = 0
-            itterationY = 0
+        if event.type == pygame.MOUSEBUTTONUP and inv and inventory.heldObjectPos != -1:
+            itterationX = 50
+            itterationY = 50
             for place in range(0, 10):
-                if itterationX < mouse_x < itterationX + 100:
-                    if itterationY < mouse_y < itterationY + 100:
-                        inventory.moveObject(place)
-                        break
+                if itterationX < mouse_x < itterationX + 75:
+                    if itterationY < mouse_y < itterationY + 75:
+                        if not inventory.items[place] == "blank":
+                            inventory.moveObject(place)
+                            break
+                            print("WHEN DO THE")
 
-                if place == 10:
+                if place == 9:
                     inventory.returnObj()
+                    print("RETURURRN")
 
                 itterationX += 100
                 if itterationX == 300:
@@ -490,9 +495,10 @@ while True:
         source.calculateLights()
 
     if inventory.getHoldPlace() >= 0:
+        print(inventory.getObjectType())
         if inventory.getObjectType() == "flashlight":
             pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 17.5, mouse_y - 7.5, 35, 15))
-            pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 7.5, mouse_y - 20, 15, 40))
+            pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 7.5, mouse_y + 7.5, 15, 40))
 
         if inventory.getObjectType() == "battery":
             pygame.draw.rect(surface, (150, 150, 150), (mouse_x - 7.5, mouse_y - 7.5, 15, 15))
