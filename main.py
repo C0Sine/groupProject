@@ -11,6 +11,15 @@ surface.convert_alpha()
 fpsClock = pygame.time.Clock()
 FPS = 60
 
+def gradientCircle( strength,opacity):
+    """ Draw a gradient circle of radius strength """
+    colour_rect = pygame.Surface( ( 3, 3 ),pygame.SRCALPHA )            # tiny! 3x3 bitmap
+    pygame.draw.rect( colour_rect, (0,0,0,opacity),  (0,0,3,3) )            # outer darkness
+    pygame.draw.rect( colour_rect, (0, 0, 0, 0), ( 1,1,1,1 ))     # inner clarity
+    colour_rect = pygame.transform.smoothscale( colour_rect, ( (strength+2)*2, (strength+2)*2 ) )  # stretch!
+    return colour_rect
+
+
 # maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
 # mask = pygame.mask.from_surface(maskimage)
 
@@ -108,9 +117,11 @@ class WallTest(pygame.sprite.Sprite):
 
 temp = pygame.Surface((800,800),pygame.SRCALPHA)
 temp.convert_alpha()
+temp2 = pygame.Surface((800,800),pygame.SRCALPHA)
+temp2.convert_alpha()
 
 class LightSource(pygame.sprite.Sprite):
-    def __init__(self, location, direction, width, strength=None):
+    def __init__(self, location, direction, width, opacity, strength=None):
         pygame.sprite.Sprite.__init__(self)
         # direction and width in degrees
 
@@ -119,6 +130,7 @@ class LightSource(pygame.sprite.Sprite):
         self.width = width
         self.strength = strength
         self.points = []
+        self.opacity=opacity
         self.mask = None
         self.rect = None
 
@@ -131,6 +143,7 @@ class LightSource(pygame.sprite.Sprite):
         self.calculateLights()
 
     def calculateLights(self):
+        self.gradient=gradientCircle(self.strength,self.opacity)
         self.points = []
 
         angle = self.direction
@@ -159,14 +172,18 @@ class LightSource(pygame.sprite.Sprite):
                     len += 10 #change it to 2 and then check the point behind it if it detects a wall
             angle += 1
 
-    def drawLights(self, opacity):
+    def drawLights(self):
         # Drawns ligns from start location to the edge points
 
         self.points.append(self.location)
 
-        temp.fill((0, 0, 0, opacity))
-        pygame.draw.circle(temp, (255,255,255,0),player.rect.center,player.rect.w*.75)
-        pygame.draw.polygon(temp, (255, 255, 255, 0), self.points)
+        temp.fill((255, 255, 255,0))
+        temp2.fill((255-self.opacity,255-self.opacity,255-self.opacity))
+        temp.blit(self.gradient, (player.rect.centerx - self.strength-1, player.rect.centery - self.strength-1))
+        pygame.draw.circle(temp2, (0,0,0,0),player.rect.center,player.rect.w*.75)
+        pygame.draw.polygon(temp2, (0, 0, 0, 0), self.points)
+        temp.blit(temp2,(0,0))
+
 
         self.mask = pygame.mask.from_surface(temp)
         self.rect = temp.get_rect()
@@ -424,7 +441,7 @@ daveLOS = LOSBullet(dave, player)
 player.rect.x, player.rect.y = 100, 100
 playerspeed = 3
 
-vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
+vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60,230, 300)
 vision.calculateLights()
 
 player_speed = 3
@@ -555,11 +572,10 @@ while True:
     if gaming:
         tempsurf = pygame.surface.Surface((800, 800))
         tempsurf.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
-        tempsurf.blit(vision.drawLights(255), (400 - player.imageX, 400 - player.imageY))
         tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
         surface.blit(tempsurf, (0, 0))
-        surface.blit(vision.drawLights(230), (400 - player.imageX, 400 - player.imageY))
+        surface.blit(vision.drawLights(), (400 - player.imageX, 400 - player.imageY))
         surface.blit(testMap.image, (400 - player.imageX, 400 - player.imageY))
         dave.goToLastSeen(daveLOS.checkLOS(), player)
         # if not pygame.sprite.collide_mask(dave, vision):
