@@ -86,7 +86,7 @@ class IndoorMap(pygame.sprite.Sprite):
         tempsurf.fill((255, 255, 255))  # whitespace will be non-collideable
         for i in range(0, len(arr)):    # parses array to create walls on tempsurf
             for j in range(0, len(arr[0])):
-                if arr[i][j] == 'x':    # x is used to assign a wall, any other character works for empty space
+                if arr[i][j] == 'X':    # x is used to assign a wall, any other character works for empty space
                     pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
         tempsurf.set_colorkey((255, 255, 255))  # sets white to transparent, allowing movement in those areas
         self.image = tempsurf   # sets map to the loaded map
@@ -97,7 +97,7 @@ class IndoorMap(pygame.sprite.Sprite):
 
 testMap = IndoorMap()
 
-testMap.loadMap('map1.txt')
+testMap.loadMap('chunkTest.txt')
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
@@ -150,13 +150,13 @@ class LightSource(pygame.sprite.Sprite):
                 lastLocation[0] = point[0]
                 lastLocation[1] = point[1]
 
-                if testMap.mask.get_at(point) != 0 or len > self.strength:
+                if point[0] < 0 or point[1] < 0 or point[0] >= testMap.rect.width or point[1] >= testMap.rect.height or testMap.mask.get_at(point) != 0 or len > self.strength:
 
                     self.points.append(lastLocation)
                     run = False
 
                 else:  # Increment Len
-                    len += 10 #change it to 2 and then check the point behind it if it detects a wall
+                    len += 10  # change it to 2 and then check the point behind it if it detects a wall
             angle += 1
 
     def drawLights(self, opacity):
@@ -174,7 +174,6 @@ class LightSource(pygame.sprite.Sprite):
         return temp
 
     #def makeLayer(self):
-
 
 
 class Player(pygame.sprite.Sprite):
@@ -236,7 +235,7 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
-        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (50, 50))
+        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (45, 45))
         self.mask = pygame.mask.from_surface(self.hitbox)
         self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
@@ -418,6 +417,36 @@ class LOSBullet(pygame.sprite.Sprite):
                 self.target.rect.centery]  # Returns True/False based on if LOS was broken and a last seen location
 
 
+class Item(pygame.sprite.Sprite):
+    def __init__(self, Name, centerX, centerY):
+        pygame.sprite.Sprite.__init__(self)
+        self.name = Name
+        if self.name == "firstAnimal":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
+        else:
+            self.name = "flashlight"
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.centerx, self.rect.centery = centerX, centerY
+        self.hoverY = 0
+        self.target = 1
+
+    def hover(self):
+        if self.target == 1:
+            if self.hoverY >= self.target:
+                self.target = -1
+            else:
+                self.hoverY += 0.05
+        elif self.target == -1:
+            if self.hoverY <= self.target:
+                self.target = 1
+            else:
+                self.hoverY -= 0.05
+
+itemList = []
+firstAnimal = Item("firstAnimal", 150, 150)
+
 daveLOS = LOSBullet(dave, player)
 
 # Fake player is an invisible "Player" used to detect collisions
@@ -573,6 +602,8 @@ while True:
     if gaming:
         tempsurf = pygame.surface.Surface((800, 800))
         blitRotate(tempsurf, dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y), dave.angle + 90)
+        firstAnimal.hover()
+        tempsurf.blit(firstAnimal.image, (400 - player.imageX + firstAnimal.rect.x, 400 - player.imageY + firstAnimal.rect.y + (firstAnimal.hoverY * 5)))
         tempsurf.blit(vision.drawLights(255), (400 - player.imageX, 400 - player.imageY))
         tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
