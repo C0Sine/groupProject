@@ -150,13 +150,13 @@ class LightSource(pygame.sprite.Sprite):
                 lastLocation[0] = point[0]
                 lastLocation[1] = point[1]
 
-                if testMap.mask.get_at(point) != 0 or len > self.strength:
+                if point[0] < 0 or point[1] < 0 or point[0] >= testMap.rect.width or point[1] >= testMap.rect.height or testMap.mask.get_at(point) != 0 or len > self.strength:
 
                     self.points.append(lastLocation)
                     run = False
 
                 else:  # Increment Len
-                    len += 10 #change it to 2 and then check the point behind it if it detects a wall
+                    len += 10  # change it to 2 and then check the point behind it if it detects a wall
             angle += 1
 
     def drawLights(self, opacity):
@@ -174,7 +174,6 @@ class LightSource(pygame.sprite.Sprite):
         return temp
 
     #def makeLayer(self):
-
 
 
 class Player(pygame.sprite.Sprite):
@@ -418,6 +417,36 @@ class LOSBullet(pygame.sprite.Sprite):
                 self.target.rect.centery]  # Returns True/False based on if LOS was broken and a last seen location
 
 
+class Item(pygame.sprite.Sprite):
+    def __init__(self, Name, centerX, centerY):
+        pygame.sprite.Sprite.__init__(self)
+        self.name = Name
+        if self.name == "firstBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
+        else:
+            self.name = "flashlight"
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.centerx, self.rect.centery = centerX, centerY
+        self.hoverY = 0
+        self.target = 1
+
+    def hover(self):
+        if self.target == 1:
+            if self.hoverY >= self.target:
+                self.target = -1
+            else:
+                self.hoverY += 0.05
+        elif self.target == -1:
+            if self.hoverY <= self.target:
+                self.target = 1
+            else:
+                self.hoverY -= 0.05
+
+itemList = []
+firstAnimal = Item("firstBear", 110, 110)
+
 daveLOS = LOSBullet(dave, player)
 
 # Fake player is an invisible "Player" used to detect collisions
@@ -530,31 +559,51 @@ while True:
         player_angle += 360
         #print("flip")
 
+
+    if dave.angle < 0:
+        dave.angle += 360
+
     if player_angle > 359:
         player_angle -= 360
         #print("FLIP")
+
+    if dave.angle > 359:
+        dave.angle -= 360
 
     if mouse_x > 400 + (player.rect.width / 2):
         target_angle = 270 - math.degrees(math.atan((mouse_y - 400 - (player.rect.height / 2)) / (mouse_x - 400 - (player.rect.width / 2))))
     elif mouse_x < 400 + (player.rect.width / 2):
         target_angle = 90 - math.degrees(math.atan((mouse_y - 400 - (player.rect.height / 2)) / (mouse_x - 400 - (player.rect.width / 2))))
 
+    if player.rect.centerx > dave.rect.centerx:
+        dave.targetAngle = 270 - math.degrees(math.atan((player.rect.centery - dave.rect.centery) / (player.rect.centerx - dave.rect.centerx)))
+    elif player.rect.centerx < dave.rect.centerx:
+        dave.targetAngle = 90 - math.degrees(math.atan((player.rect.centery - dave.rect.centery) / (player.rect.centerx - dave.rect.centerx)))
+
     if player_angle < 90 and target_angle > 270:
         player_angle -= (player_angle - target_angle) % 360 / 10
-
     elif player_angle > 270 and target_angle < 90:
         player_angle += (target_angle - player_angle) % 360 / 10
         #print("works")
-
     else:
         player_angle -= (player_angle - target_angle) / 10
 
+    if dave.angle < 90 and dave.targetAngle > 270:
+        dave.angle -= (dave.angle - dave.targetAngle) % 360 / 10
+    elif dave.angle > 270 and dave.targetAngle < 90:
+        dave.angle += (dave.angle - dave.targetAngle) % 360 / 10
+    else:
+        dave.angle -= (dave.angle - dave.targetAngle) / 10
+
     if int(player_angle) != int(target_angle):
         vision.changeDirection(int(-(vision.width / 2) - player_angle - 90))
+
     surface.fill((25, 25, 25))
     if gaming:
         tempsurf = pygame.surface.Surface((800, 800))
-        tempsurf.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
+        blitRotate(tempsurf, dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y), dave.angle + 90)
+        firstAnimal.hover()
+        tempsurf.blit(firstAnimal.image, (400 - player.imageX + firstAnimal.rect.x, 400 - player.imageY + firstAnimal.rect.y + (firstAnimal.hoverY * 5)))
         tempsurf.blit(vision.drawLights(255), (400 - player.imageX, 400 - player.imageY))
         tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
