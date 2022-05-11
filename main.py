@@ -421,7 +421,7 @@ class Item(pygame.sprite.Sprite):
     def __init__(self, Name, centerX, centerY):
         pygame.sprite.Sprite.__init__(self)
         self.name = Name
-        if self.name == "firstAnimal":
+        if self.name == "firstBear":
             self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
         else:
             self.name = "flashlight"
@@ -445,7 +445,7 @@ class Item(pygame.sprite.Sprite):
                 self.hoverY -= 0.05
 
 itemList = []
-firstAnimal = Item("firstAnimal", 150, 150)
+firstAnimal = Item("firstBear", 110, 110)
 
 daveLOS = LOSBullet(dave, player)
 
