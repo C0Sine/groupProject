@@ -179,6 +179,9 @@ class Inventory:
     def getHoldPlace(self):
         return self.heldObjectPos
 
+    def placeObject(self, place, obj):
+        self.items[place] = obj
+
     def getObjectType(self):
         return self.heldObject.type()
 
@@ -190,32 +193,18 @@ class Inventory:
             pygame.draw.rect(surface, (100, 100, 100), (x, y, 75, 75))
             pygame.draw.rect(surface, (50, 50, 50), (x + 7, y + 7, 61, 61))
 
+            if self.items[i - 1].type() == "flashlight":
+                pygame.draw.rect(surface, (20, 20, 20), (x + 20, y + 10, 35, 15))
+                pygame.draw.rect(surface, (20, 20, 20), (x + 30, y + 25, 15, 40))
+
+            if self.items[i - 1].type() == "battery":
+                pygame.draw.rect(surface, (150, 150, 150), (x + 30, y + 10, 15, 15))
+                pygame.draw.rect(surface, (200, 200, 0), (x + 20, y + 20, 35, 45))
+
             x += 100
             if i % 3 == 0:
                 y += 100
                 x = 50
-
-        x = 50
-        y = 50
-
-        for item in self.items:
-            if item.type() == "flashlight":
-                pygame.draw.rect(surface, (20, 20, 20), (x + 20, y + 10, 35, 15))
-                pygame.draw.rect(surface, (20, 20, 20), (x + 30, y + 25, 15, 40))
-
-                x += 100
-                if i % 3 == 0:
-                    y += 100
-                    x = 50
-
-            if item.type() == "battery":
-                pygame.draw.rect(surface, (150, 150, 150), (x + 30, y + 10, 15, 15))
-                pygame.draw.rect(surface, (200, 200, 0), (x + 20, y + 20, 35, 45))
-
-                x += 100
-                if i % 3 == 0:
-                    y += 100
-                    x = 50
 
 
 class LightSource:
@@ -347,8 +336,8 @@ target_angle = 0
 
 inv = False
 inventory = Inventory()
-inventory.appendObject(flashlight)
-inventory.appendObject(battery)
+inventory.placeObject(8, flashlight)
+inventory.placeObject(7, battery)
 
 while True:
     frame += 1
@@ -363,38 +352,43 @@ while True:
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
         if event.type == pygame.MOUSEBUTTONDOWN and inv:
+            print("BOOMSHAKALAKA")
             itterationX = 50
             itterationY = 50
             for place in range(0, 9):
                 if itterationX < mouse_x < itterationX + 75:
                     if itterationY < mouse_y < itterationY + 75:
+                        print("DOO DOO")
                         inventory.holdingObject(place)
                         break
 
                 itterationX += 100
-                if itterationX == 300:
-                    itterationX = 0
+                if itterationX >= 350:
+                    itterationX = 50
                     itterationY += 100
+                    print("RESET")
 
         if event.type == pygame.MOUSEBUTTONUP and inv and inventory.heldObjectPos != -1:
             itterationX = 50
             itterationY = 50
+            print("x: "+str(mouse_x)+", y: "+str(mouse_y))
             for place in range(0, 10):
+                print("ix: "+str(itterationX)+", iy: "+str(itterationY))
                 if itterationX < mouse_x < itterationX + 75:
                     if itterationY < mouse_y < itterationY + 75:
-                        if not inventory.items[place] == "blank":
-                            inventory.moveObject(place)
-                            break
-                            print("WHEN DO THE")
+                        inventory.moveObject(place)
+                        break
+
+                itterationX += 100
+                if itterationX >= 350:
+                    itterationX = 50
+                    print("RESET")
+                    itterationY += 100
 
                 if place == 9:
                     inventory.returnObj()
                     print("RETURURRN")
 
-                itterationX += 100
-                if itterationX == 300:
-                    itterationX = 0
-                    itterationY += 100
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
             inv = not inv
@@ -495,7 +489,6 @@ while True:
         source.calculateLights()
 
     if inventory.getHoldPlace() >= 0:
-        print(inventory.getObjectType())
         if inventory.getObjectType() == "flashlight":
             pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 17.5, mouse_y - 7.5, 35, 15))
             pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 7.5, mouse_y + 7.5, 15, 40))
