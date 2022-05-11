@@ -86,7 +86,7 @@ class IndoorMap(pygame.sprite.Sprite):
         tempsurf.fill((255, 255, 255))  # whitespace will be non-collideable
         for i in range(0, len(arr)):    # parses array to create walls on tempsurf
             for j in range(0, len(arr[0])):
-                if arr[i][j] == 'X':    # x is used to assign a wall, any other character works for empty space
+                if arr[i][j] == 'x':    # x is used to assign a wall, any other character works for empty space
                     pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
         tempsurf.set_colorkey((255, 255, 255))  # sets white to transparent, allowing movement in those areas
         self.image = tempsurf   # sets map to the loaded map
@@ -97,7 +97,7 @@ class IndoorMap(pygame.sprite.Sprite):
 
 testMap = IndoorMap()
 
-testMap.loadMap('chunkTest.txt')
+testMap.loadMap('map1.txt')
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
