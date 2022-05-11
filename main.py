@@ -116,6 +116,7 @@ class Flashlight:
         self.powerMultiplier = powerMultiplier
         self.battery = battery
         self.ticks = 0
+        self.type = "flashlight"
 
     def recharge(self):
         self.battery = 400
@@ -146,6 +147,7 @@ class Battery:
 
     def __init__(self):
         self.power = 400
+        self.type = "battery"
 
     def type(self):
         return "battery"
@@ -155,9 +157,42 @@ class Blank:
 
     def __init__(self):
         self.blank = True
+        self.image = pygame.transform.scale(pygame.image.load('LOSTest.png'), (1, 1))
+        self.type = "blank"
 
     def type(self):
         return "blank"
+
+
+class Bear(pygame.sprite.Sprite):
+    def __init__(self, Name, centerX, centerY):
+        pygame.sprite.Sprite.__init__(self)
+        self.name = Name
+        if self.name == "firstBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.centerx, self.rect.centery = centerX, centerY
+        self.hoverY = 0
+        self.target = 1
+        self.type = "bear"
+
+    def hover(self):
+        if self.target == 1:
+            if self.hoverY >= self.target:
+                self.target = -1
+            else:
+                self.hoverY += 0.05
+        elif self.target == -1:
+            if self.hoverY <= self.target:
+                self.target = 1
+            else:
+                self.hoverY -= 0.05
+
+
+bearList = []
+firstAnimal = Bear("firstBear", 250, 250)
+bearList.append(firstAnimal)
 
 
 class Inventory:
@@ -168,12 +203,12 @@ class Inventory:
 
     def appendObject(self, obj):
         for i in range(0, 9):
-            if self.items[i].type() == "blank":
+            if self.items[i].type == "blank":
                 self.items[i] = obj
                 break
 
     def moveObject(self, place):
-        if self.items[place].type() == "blank":
+        if self.items[place].type == "blank":
             self.items[place] = self.heldObject
 
         else:
@@ -189,7 +224,7 @@ class Inventory:
         print("YEAH BOIIII")
 
     def holdingObject(self, place):
-        if not self.items[place].type() == "blank":
+        if not self.items[place].type == "blank":
             self.heldObjectPos = place
             self.heldObject = self.items[place]
             self.items[place] = Blank()
@@ -202,7 +237,7 @@ class Inventory:
         self.items[place] = obj
 
     def getObjectType(self):
-        return self.heldObject.type()
+        return self.heldObject.type
 
     def blitInventory(self):
         x = 50
@@ -212,13 +247,16 @@ class Inventory:
             pygame.draw.rect(surface, (100, 100, 100), (x, y, 75, 75))
             pygame.draw.rect(surface, (50, 50, 50), (x + 7, y + 7, 61, 61))
 
-            if self.items[i - 1].type() == "flashlight":
+            if self.items[i - 1].type == "flashlight":
                 pygame.draw.rect(surface, (20, 20, 20), (x + 20, y + 10, 35, 15))
                 pygame.draw.rect(surface, (20, 20, 20), (x + 30, y + 25, 15, 40))
 
-            if self.items[i - 1].type() == "battery":
+            if self.items[i - 1].type == "battery":
                 pygame.draw.rect(surface, (150, 150, 150), (x + 30, y + 10, 15, 15))
                 pygame.draw.rect(surface, (200, 200, 0), (x + 20, y + 20, 35, 45))
+
+            if self.items[i - 1].type == "bear":
+                surface.blit(self.items[i - 1].image, (x + 5, y + 5))
 
             x += 100
             if i % 3 == 0:
@@ -319,6 +357,11 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += yDif
         self.imageX = self.rect.x - abs((self.rect.width - self.image.get_width()) / 2)     # Changes image location to center hitbox
         self.imageY = self.rect.y - abs((self.rect.height - self.image.get_height()) / 2)   # Changes image location to center hitbox
+        for i in bearList:
+            if pygame.sprite.collide_mask(self, i):
+                inventory.appendObject(i)
+                i.rect.x -= 1000
+                print("added item")
 
     def updateCollisionPosition(self, direction):
         offset = (self.rect.x - testMap.rect.x, self.rect.y - testMap.rect.y)
@@ -358,7 +401,7 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
-        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (45, 45))
+        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (40, 40))
         self.mask = pygame.mask.from_surface(self.hitbox)
         self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
@@ -539,36 +582,6 @@ class LOSBullet(pygame.sprite.Sprite):
         return [lostLOS, self.target.rect.centerx,
                 self.target.rect.centery]  # Returns True/False based on if LOS was broken and a last seen location
 
-
-class Item(pygame.sprite.Sprite):
-    def __init__(self, Name, centerX, centerY):
-        pygame.sprite.Sprite.__init__(self)
-        self.name = Name
-        if self.name == "firstBear":
-            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
-        else:
-            self.name = "flashlight"
-            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
-        self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
-        self.rect.centerx, self.rect.centery = centerX, centerY
-        self.hoverY = 0
-        self.target = 1
-
-    def hover(self):
-        if self.target == 1:
-            if self.hoverY >= self.target:
-                self.target = -1
-            else:
-                self.hoverY += 0.05
-        elif self.target == -1:
-            if self.hoverY <= self.target:
-                self.target = 1
-            else:
-                self.hoverY -= 0.05
-
-itemList = []
-firstAnimal = Item("firstBear", 110, 110)
 
 daveLOS = LOSBullet(dave, player)
 
@@ -803,13 +816,15 @@ while True:
         vision.calculateLights()
 
     if inventory.getHoldPlace() >= 0:
-        if inventory.getObjectType() == "flashlight":
-            pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 17.5, mouse_y - 7.5, 35, 15))
-            pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 7.5, mouse_y + 7.5, 15, 40))
+        # if inventory.getObjectType() == "flashlight":
+        #     pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 17.5, mouse_y - 7.5, 35, 15))
+        #     pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 7.5, mouse_y + 7.5, 15, 40))
+        #
+        # if inventory.getObjectType() == "battery":
+        #     pygame.draw.rect(surface, (150, 150, 150), (mouse_x - 7.5, mouse_y - 7.5, 15, 15))
+        #     pygame.draw.rect(surface, (200, 200, 0), (mouse_x - 17.5, mouse_y - 22.5, 35, 45))
 
-        if inventory.getObjectType() == "battery":
-            pygame.draw.rect(surface, (150, 150, 150), (mouse_x - 7.5, mouse_y - 7.5, 15, 15))
-            pygame.draw.rect(surface, (200, 200, 0), (mouse_x - 17.5, mouse_y - 22.5, 35, 45))
+        surface.blit(inventory.heldObject.image, (mouse_x - 25, mouse_y - 25))
 
     pygame.display.update()
     fpsClock.tick(FPS)
