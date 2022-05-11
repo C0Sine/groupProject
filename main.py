@@ -218,24 +218,24 @@ def blitRotate(surf, image, topleft, angle):
     new_rect = rotated_image.get_rect(center = image.get_rect(topleft = topleft).center)
     surf.blit(rotated_image, new_rect.topleft)
 
-    def createLOSLine(self, Target):
-        LOSLine = pygame.draw.line(surface, (0, 0, 0),
-                                   (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
-                                   (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
-        # pygame.draw.line(surface, (0, 0, 0), (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
-        if LOSLine.colliderect(Target):
-            LOSLine = pygame.draw.line(surface, (0, 255, 0),
-                                       (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
-                                       (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
-        # else: LOSLine = pygame.draw.line(surface, (0, 255, 0), (self.rect.x + self.rect.width / 2, self.rect.y +
-        # self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+    # def createLOSLine(self, Target):
+    #     LOSLine = pygame.draw.line(surface, (0, 0, 0),
+    #                                (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
+    #                                (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+    #     # pygame.draw.line(surface, (0, 0, 0), (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+    #     if LOSLine.colliderect(Target):
+    #         LOSLine = pygame.draw.line(surface, (0, 255, 0),
+    #                                    (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
+    #                                    (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+    #     # else: LOSLine = pygame.draw.line(surface, (0, 255, 0), (self.rect.x + self.rect.width / 2, self.rect.y +
+    #     # self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
 
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
-        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (45, 45))
+        self.image = pygame.transform.scale(pygame.image.load('zombieSprite.png'), (45, 45))
+        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (30, 30))
         self.mask = pygame.mask.from_surface(self.hitbox)
         self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
