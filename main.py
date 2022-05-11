@@ -234,8 +234,8 @@ def blitRotate(surf, image, topleft, angle):
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('zombieSprite.png'), (45, 45))
-        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (30, 30))
+        self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
+        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (45, 45))
         self.mask = pygame.mask.from_surface(self.hitbox)
         self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
