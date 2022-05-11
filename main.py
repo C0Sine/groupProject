@@ -94,10 +94,10 @@ class IndoorMap(pygame.sprite.Sprite):
         self.rect = self.mask.get_rect()
 
 
-
 testMap = IndoorMap()
 
 testMap.loadMap('map1.txt')
+
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
@@ -106,8 +106,125 @@ class WallTest(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.mask.get_rect()
 
+
 temp = pygame.Surface((800,800),pygame.SRCALPHA)
 temp.convert_alpha()
+
+
+class Flashlight:
+    def __init__(self, powerMultiplier, battery):
+        self.powerMultiplier = powerMultiplier
+        self.battery = battery
+        self.ticks = 0
+
+    def recharge(self):
+        self.battery = 400
+        self.ticks = 0
+
+    def getPower(self):
+        return self.powerMultiplier * self.battery
+
+    def tick(self):
+        self.ticks += 1
+
+        if self.ticks % 60 == 0 and self.ticks / 60 > 0:
+            self.battery -= 1
+            if self.battery <= 0:
+                self.battery = 0
+
+            return True
+        return False
+
+    def getTicks(self):
+        return self.ticks
+
+    def type(self):
+        return "flashlight"
+
+
+class Battery:
+
+    def __init__(self):
+        self.power = 400
+
+    def type(self):
+        return "battery"
+
+
+class Blank:
+
+    def __init__(self):
+        self.blank = True
+
+    def type(self):
+        return "blank"
+
+
+class Inventory:
+    def __init__(self):
+        self.items = [Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank()]
+        self.heldObjectPos = -1
+        self.heldObject = Blank()
+
+    def appendObject(self, obj):
+        for i in range(0, 9):
+            if self.items[i].type() == "blank":
+                self.items[i] = obj
+                break
+
+    def moveObject(self, place):
+        if self.items[place].type() == "blank":
+            self.items[place] = self.heldObject
+
+        else:
+            self.items[self.heldObjectPos] = self.heldObject
+
+        self.heldObjectPos = -1
+        self.heldObject = Blank()
+
+    def returnObj(self):
+        self.items[self.heldObjectPos] = self.heldObject
+        self.heldObject = Blank()
+        self.heldObjectPos = -1
+        print("YEAH BOIIII")
+
+    def holdingObject(self, place):
+        if not self.items[place].type() == "blank":
+            self.heldObjectPos = place
+            self.heldObject = self.items[place]
+            self.items[place] = Blank()
+            print(self.items)
+
+    def getHoldPlace(self):
+        return self.heldObjectPos
+
+    def placeObject(self, place, obj):
+        self.items[place] = obj
+
+    def getObjectType(self):
+        return self.heldObject.type()
+
+    def blitInventory(self):
+        x = 50
+        y = 50
+        for i in range(1, 10):
+
+            pygame.draw.rect(surface, (100, 100, 100), (x, y, 75, 75))
+            pygame.draw.rect(surface, (50, 50, 50), (x + 7, y + 7, 61, 61))
+
+            if self.items[i - 1].type() == "flashlight":
+                pygame.draw.rect(surface, (20, 20, 20), (x + 20, y + 10, 35, 15))
+                pygame.draw.rect(surface, (20, 20, 20), (x + 30, y + 25, 15, 40))
+
+            if self.items[i - 1].type() == "battery":
+                pygame.draw.rect(surface, (150, 150, 150), (x + 30, y + 10, 15, 15))
+                pygame.draw.rect(surface, (200, 200, 0), (x + 20, y + 20, 35, 45))
+
+            x += 100
+            if i % 3 == 0:
+                y += 100
+                x = 50
+
 
 class LightSource(pygame.sprite.Sprite):
     def __init__(self, location, direction, width, strength=None):
@@ -129,6 +246,9 @@ class LightSource(pygame.sprite.Sprite):
     def changeDirection(self, direction):
         self.direction = direction
         self.calculateLights()
+
+    def changeStrength(self, new):
+        self.strength = new
 
     def calculateLights(self):
         self.points = []
@@ -156,7 +276,10 @@ class LightSource(pygame.sprite.Sprite):
                     run = False
 
                 else:  # Increment Len
-                    len += 10  # change it to 2 and then check the point behind it if it detects a wall
+                    if self.strength - len < 10:
+                        len += self.strength - len + 1
+                    else:
+                        len += 10
             angle += 1
 
     def drawLights(self, opacity):
@@ -456,6 +579,11 @@ playerspeed = 3
 vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
 vision.calculateLights()
 
+flashlight = Flashlight(1, 400)
+battery = Battery()
+
+vision.changeStrength(flashlight.getPower())
+
 player_speed = 3
 frame = 0
 mouse_x, mouse_y = 0, 0
@@ -467,6 +595,12 @@ gaming=False
 menu=Menu(["Play","Close","Credits"],True,50,(255,255,255))
 credits=None
 currentMenu=menu
+
+inv = False
+inventory = Inventory()
+inventory.placeObject(8, flashlight)
+inventory.placeObject(7, battery)
+
 while True:
     frame += 1
     player.oldX, player.oldY = player.rect[0], player.rect[1]
@@ -499,6 +633,49 @@ while True:
                     print("aaa")
         if event.type == pygame.MOUSEMOTION:
             mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        if event.type == pygame.MOUSEBUTTONDOWN and inv:
+            print("BOOMSHAKALAKA")
+            itterationX = 50
+            itterationY = 50
+            for place in range(0, 9):
+                if itterationX < mouse_x < itterationX + 75:
+                    if itterationY < mouse_y < itterationY + 75:
+                        print("DOO DOO")
+                        inventory.holdingObject(place)
+                        break
+
+                itterationX += 100
+                if itterationX >= 350:
+                    itterationX = 50
+                    itterationY += 100
+                    print("RESET")
+
+        if event.type == pygame.MOUSEBUTTONUP and inv and inventory.heldObjectPos != -1:
+            itterationX = 50
+            itterationY = 50
+            print("x: "+str(mouse_x)+", y: "+str(mouse_y))
+            for place in range(0, 10):
+                print("ix: "+str(itterationX)+", iy: "+str(itterationY))
+                if itterationX < mouse_x < itterationX + 75:
+                    if itterationY < mouse_y < itterationY + 75:
+                        inventory.moveObject(place)
+                        break
+
+                itterationX += 100
+                if itterationX >= 350:
+                    itterationX = 50
+                    print("RESET")
+                    itterationY += 100
+
+                if place == 9:
+                    inventory.returnObj()
+                    print("RETURURRN")
+
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+            inv = not inv
+
 
     if gaming:    # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
@@ -615,8 +792,24 @@ while True:
         #     surface.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
         blitRotate(surface, player.image, (400, 400), player_angle)
         surface.blit(update_fps(), (10, 0))
+        if inv:
+            inventory.blitInventory()
     else:
         surface.blit(currentMenu.getMenu(),(0,0))
     surface.blit(update_fps(), (10, 0))
+
+    if flashlight.tick():
+        vision.changeStrength(flashlight.getPower())
+        vision.calculateLights()
+
+    if inventory.getHoldPlace() >= 0:
+        if inventory.getObjectType() == "flashlight":
+            pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 17.5, mouse_y - 7.5, 35, 15))
+            pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 7.5, mouse_y + 7.5, 15, 40))
+
+        if inventory.getObjectType() == "battery":
+            pygame.draw.rect(surface, (150, 150, 150), (mouse_x - 7.5, mouse_y - 7.5, 15, 15))
+            pygame.draw.rect(surface, (200, 200, 0), (mouse_x - 17.5, mouse_y - 22.5, 35, 45))
+
     pygame.display.update()
     fpsClock.tick(FPS)
