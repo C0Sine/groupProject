@@ -554,7 +554,7 @@ vision.calculateLights()
 flashlight = Flashlight(1, 400)
 battery = Battery()
 
-source.changeStrength(flashlight.getPower())
+vision.changeStrength(flashlight.getPower())
 
 player_speed = 3
 frame = 0
@@ -568,11 +568,11 @@ inventory.placeObject(8, flashlight)
 inventory.placeObject(7, battery)
 
 #game pause variable
-gaming=False
+gaming = False
 
-menu=Menu(["Play","Close","Credits"],True,50,(255,255,255))
-credits=None
-currentMenu=menu
+menu = Menu(["Play", "Close", "Credits"], True, 50, (255, 255, 255))
+credits = None
+currentMenu = menu
 while True:
     frame += 1
     player.oldX, player.oldY = player.rect[0], player.rect[1]
