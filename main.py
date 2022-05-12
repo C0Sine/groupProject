@@ -119,8 +119,8 @@ class Flashlight:
         self.ticks = 0
 
     def recharge(self):
-        self.battery = 400
-        self.ticks = 0
+        self.battery = 401
+        self.ticks = 59
 
     def getPower(self):
         return self.powerMultiplier * self.battery
@@ -161,6 +161,10 @@ class Blank:
         return "blank"
 
 
+flashlight = Flashlight(1, 200)
+battery = Battery()
+
+
 class Inventory:
     def __init__(self):
         self.items = [Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank()]
@@ -176,9 +180,15 @@ class Inventory:
     def moveObject(self, place):
         if self.items[place].type() == "blank":
             self.items[place] = self.heldObject
+            print("BOO")
+
+        elif self.items[place].type() == "flashlight" and self.heldObject.type() == "battery":
+            flashlight.recharge()
+            print("RECHARGE")
 
         else:
             self.items[self.heldObjectPos] = self.heldObject
+            print("FAKE")
 
         self.heldObjectPos = -1
         self.heldObject = Blank()
@@ -551,9 +561,6 @@ playerspeed = 3
 vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
 vision.calculateLights()
 
-flashlight = Flashlight(1, 400)
-battery = Battery()
-
 vision.changeStrength(flashlight.getPower())
 
 player_speed = 3
@@ -573,6 +580,7 @@ gaming = False
 menu = Menu(["Play", "Close", "Credits"], True, 50, (255, 255, 255))
 credits = None
 currentMenu = menu
+
 while True:
     frame += 1
     player.oldX, player.oldY = player.rect[0], player.rect[1]
