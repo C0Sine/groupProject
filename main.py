@@ -161,7 +161,7 @@ class Blank:
         return "blank"
 
 
-flashlight = Flashlight(1, 200)
+flashlight = Flashlight(1, 300)
 battery = Battery()
 
 
