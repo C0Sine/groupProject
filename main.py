@@ -5,11 +5,12 @@ import sys
 import math
 
 from pygame import QUIT
+
 pygame.init()
 surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
 surface.convert_alpha()
 fpsClock = pygame.time.Clock()
-FPS = 60
+FPS = 30
 
 # maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
 # mask = pygame.mask.from_surface(maskimage)
@@ -70,6 +71,7 @@ class OutdoorMap():
         # self.map_array[key_loc[0]][key_loc[1]] = Chunk(10, 0)
         print(self.map_array)
 
+
 map = OutdoorMap()
 
 
@@ -84,19 +86,19 @@ class IndoorMap(pygame.sprite.Sprite):
         arr = parse_file(file)
         tempsurf = pygame.Surface((len(arr[0]) * 25, len(arr) * 25))    # surface for walls
         tempsurf.fill((255, 255, 255))  # whitespace will be non-collideable
-        for i in range(0, len(arr)):    # parses array to create walls on tempsurf
+        for i in range(0, len(arr)):  # parses array to create walls on tempsurf
             for j in range(0, len(arr[0])):
-                if arr[i][j] == 'x':    # x is used to assign a wall, any other character works for empty space
+                if arr[i][j] == 'x':  # x is used to assign a wall, any other character works for empty space
                     pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
         tempsurf.set_colorkey((255, 255, 255))  # sets white to transparent, allowing movement in those areas
-        self.image = tempsurf   # sets map to the loaded map
+        self.image = tempsurf  # sets map to the loaded map
         self.mask = pygame.mask.from_surface(tempsurf)
         self.rect = self.mask.get_rect()
 
 
 testMap = IndoorMap()
 
-testMap.loadMap('map1.txt')
+testMap.loadMap('starTest.txt')
 
 
 class WallTest(pygame.sprite.Sprite):
@@ -107,7 +109,8 @@ class WallTest(pygame.sprite.Sprite):
         self.rect = self.mask.get_rect()
 
 
-temp = pygame.Surface((800,800),pygame.SRCALPHA)
+
+temp = pygame.Surface((800, 800), pygame.SRCALPHA)
 temp.convert_alpha()
 
 
@@ -117,6 +120,7 @@ class Flashlight:
         self.battery = battery
         self.ticks = 0
         self.type = "flashlight"
+        self.image = pygame.transform.scale(pygame.image.load('flashlight.png'), (55, 55))
 
     def recharge(self):
         self.battery = 400
@@ -148,6 +152,7 @@ class Battery:
     def __init__(self):
         self.power = 400
         self.type = "battery"
+        self.image = pygame.transform.scale(pygame.image.load('battery.png'), (50, 50))
 
     def type(self):
         return "battery"
@@ -168,7 +173,10 @@ class Bear(pygame.sprite.Sprite):
     def __init__(self, Name, centerX, centerY):
         pygame.sprite.Sprite.__init__(self)
         self.name = Name
+        self.onStar = False
         if self.name == "firstBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        elif self.name == "secondBear":
             self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
@@ -191,8 +199,10 @@ class Bear(pygame.sprite.Sprite):
 
 
 bearList = []
-firstAnimal = Bear("firstBear", 250, 250)
-bearList.append(firstAnimal)
+firstBear = Bear("firstBear", 250, 250)
+secondBear = Bear("secondBear", 100, 100)
+bearList.append(firstBear)
+bearList.append(secondBear)
 
 
 class Inventory:
@@ -221,14 +231,14 @@ class Inventory:
         self.items[self.heldObjectPos] = self.heldObject
         self.heldObject = Blank()
         self.heldObjectPos = -1
-        print("YEAH BOIIII")
+        #print("YEAH BOIIII")
 
     def holdingObject(self, place):
         if not self.items[place].type == "blank":
             self.heldObjectPos = place
             self.heldObject = self.items[place]
             self.items[place] = Blank()
-            print(self.items)
+            #print(self.items)
 
     def getHoldPlace(self):
         return self.heldObjectPos
@@ -239,6 +249,15 @@ class Inventory:
     def getObjectType(self):
         return self.heldObject.type
 
+    def returnBears(self):
+        returnList = []
+        for i in self.items:
+            if i.type == "bear":
+                i.onStar = True
+                returnList.append(i)
+                i.type = "blank"
+        return returnList
+
     def blitInventory(self):
         x = 50
         y = 50
@@ -248,20 +267,28 @@ class Inventory:
             pygame.draw.rect(surface, (50, 50, 50), (x + 7, y + 7, 61, 61))
 
             if self.items[i - 1].type == "flashlight":
-                pygame.draw.rect(surface, (20, 20, 20), (x + 20, y + 10, 35, 15))
-                pygame.draw.rect(surface, (20, 20, 20), (x + 30, y + 25, 15, 40))
-
-            if self.items[i - 1].type == "battery":
-                pygame.draw.rect(surface, (150, 150, 150), (x + 30, y + 10, 15, 15))
-                pygame.draw.rect(surface, (200, 200, 0), (x + 20, y + 20, 35, 45))
-
-            if self.items[i - 1].type == "bear":
+                surface.blit(self.items[i - 1].image, (x + 10, y + 12))
+            elif self.items[i - 1].type == "bear":
                 surface.blit(self.items[i - 1].image, (x + 5, y + 5))
+            elif self.items[i - 1].type == "battery":
+                surface.blit(self.items[i - 1].image, (x + 13, y + 10))
 
             x += 100
             if i % 3 == 0:
                 y += 100
                 x = 50
+
+
+class Star(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.transform.scale(pygame.image.load("fivePointStar.png"), (425, 425))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x, self.rect.y = 200, 200
+
+
+star = Star()
 
 
 class LightSource(pygame.sprite.Sprite):
@@ -358,10 +385,19 @@ class Player(pygame.sprite.Sprite):
         self.imageX = self.rect.x - abs((self.rect.width - self.image.get_width()) / 2)     # Changes image location to center hitbox
         self.imageY = self.rect.y - abs((self.rect.height - self.image.get_height()) / 2)   # Changes image location to center hitbox
         for i in bearList:
-            if pygame.sprite.collide_mask(self, i):
+            if pygame.sprite.collide_mask(self, i) and not i.onStar:
                 inventory.appendObject(i)
                 i.rect.x -= 1000
-                print("added item")
+                #print("added item")
+        if pygame.sprite.collide_mask(self, star):
+            heldBears = inventory.returnBears()
+            if len(heldBears) != 0:
+                for i in range(len(heldBears)):
+                    if i == 0:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 225, star.rect.y + 25
+                    if i == 1:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 355, star.rect.y + 125
+
 
     def updateCollisionPosition(self, direction):
         offset = (self.rect.x - testMap.rect.x, self.rect.y - testMap.rect.y)
@@ -381,9 +417,11 @@ class Player(pygame.sprite.Sprite):
 def blitRotate(surf, image, topleft, angle):
     rotated_image = pygame.transform.rotate(image, angle)
     rotated_image.set_colorkey((255, 255, 255))
-    new_rect = rotated_image.get_rect(center = image.get_rect(topleft = topleft).center)
+    new_rect = rotated_image.get_rect(center=image.get_rect(topleft=topleft).center)
     surf.blit(rotated_image, new_rect.topleft)
 
+
+# Menu class
     # def createLOSLine(self, Target):
     #     LOSLine = pygame.draw.line(surface, (0, 0, 0),
     #                                (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
@@ -495,19 +533,22 @@ class Enemy(pygame.sprite.Sprite):
 
 
 dave = Enemy()
-dave.rect.x, dave.rect.y = 80, 80
+dave.rect.x, dave.rect.y = 100, 100
+
 #Menu class
 class Menu:
-    output=pygame.Surface((800,800))
-    def __init__(self,items,isTitle,itemSize,textColor):
+    output = pygame.Surface((800, 800))
+
+    def __init__(self, items, isTitle, itemSize, textColor):
         self.font = pygame.font.SysFont('arial', itemSize)
-        self.isTitle=isTitle
-        self.itemSize=itemSize
-        self.items=items
-        self.color=textColor
+        self.isTitle = isTitle
+        self.itemSize = itemSize
+        self.items = items
+        self.color = textColor
         self.create()
+
     def create(self):
-        self.output.fill((0,0,0))
+        self.output.fill((0, 0, 0))
         displace = (self.itemSize / 2)
         # if its the main menu put game logo on top and move down options
         if self.isTitle:
@@ -517,25 +558,25 @@ class Menu:
             text = self.font.render(self.items[n], 0, self.color)
             text_rect = text.get_rect(center=(400, (n * self.itemSize) + displace))
             self.output.blit(text, text_rect)
+
     def getMenu(self):
-        return(self.output)
-    def update(self,items,newSize = None):
-        self.items=items
-        if newSize!=None:
-            self.itemSize=newSize
+        return (self.output)
+
+    def update(self, items, newSize=None):
+        self.items = items
+        if newSize != None:
+            self.itemSize = newSize
         self.create()
-    def click(self,pos):
-        #finds and returns what item is clicked
-        offset=0
+
+    def click(self, pos):
+        # finds and returns what item is clicked
+        offset = 0
         if self.isTitle:
-            offset=400
-        itemClicked=int((pos[1]-offset)/self.itemSize)
-        if 0>itemClicked>=len(self.items) or 200>pos[0] or 600<pos[0]:
-            itemClicked=None
+            offset = 400
+        itemClicked = int((pos[1] - offset) / self.itemSize)
+        if 0 > itemClicked >= len(self.items) or 200 > pos[0] or 600 < pos[0]:
+            itemClicked = None
         return itemClicked
-
-
-
 
 
 player = Player()
@@ -602,12 +643,12 @@ frame = 0
 mouse_x, mouse_y = 0, 0
 player_angle = 0
 target_angle = 0
-#game pause variable
-gaming=False
+# game pause variable
+gaming = False
 
-menu=Menu(["Play","Close","Credits"],True,50,(255,255,255))
-credits=None
-currentMenu=menu
+menu = Menu(["Play", "Close", "Credits"], True, 50, (255, 255, 255))
+credits = None
+currentMenu = menu
 
 inv = False
 inventory = Inventory()
@@ -623,38 +664,39 @@ while True:
             pygame.quit()
             print('l8r sk8r')
             sys.exit()
-        if event.type == pygame.MOUSEBUTTONUP and not gaming: #menu click handling
+        if event.type == pygame.MOUSEBUTTONUP and not gaming:  # menu click handling
             pos = pygame.mouse.get_pos()
-            item=currentMenu.click(pos)
-            if item==0:
-                if currentMenu==menu:
-                    gaming=True
-                    currentMenu=None
-            elif item==1:
-                if currentMenu==menu:
+            item = currentMenu.click(pos)
+            if item == 0:
+                if currentMenu == menu:
+                    gaming = True
+                    currentMenu = None
+            elif item == 1:
+                if currentMenu == menu:
                     pygame.quit()
                     print('l8r sk8r')
                     sys.exit()
-            elif item==2:
-                if currentMenu==menu:
-                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude:(what jude did)","Rowen:(what rowen did)","Back"],False,50,(255,255,255))
-                    currentMenu=credits
-            elif item==4:
-                if currentMenu==credits:
-                    currentMenu=menu
+            elif item == 2:
+                if currentMenu == menu:
+                    credits = Menu(["Sam:(what sam did)", "Brandon:(what brandon did)", "Jude:(what jude did)",
+                                    "Rowen:(what rowen did)", "Back"], False, 50, (255, 255, 255))
+                    currentMenu = credits
+            elif item == 4:
+                if currentMenu == credits:
+                    currentMenu = menu
                     currentMenu.create()
-                    print("aaa")
+                    #print("aaa")
         if event.type == pygame.MOUSEMOTION:
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
         if event.type == pygame.MOUSEBUTTONDOWN and inv:
-            print("BOOMSHAKALAKA")
+            #print("BOOMSHAKALAKA")
             itterationX = 50
             itterationY = 50
             for place in range(0, 9):
                 if itterationX < mouse_x < itterationX + 75:
                     if itterationY < mouse_y < itterationY + 75:
-                        print("DOO DOO")
+                        #print("DOO DOO")
                         inventory.holdingObject(place)
                         break
 
@@ -662,14 +704,14 @@ while True:
                 if itterationX >= 350:
                     itterationX = 50
                     itterationY += 100
-                    print("RESET")
+                    #print("RESET")
 
         if event.type == pygame.MOUSEBUTTONUP and inv and inventory.heldObjectPos != -1:
             itterationX = 50
             itterationY = 50
-            print("x: "+str(mouse_x)+", y: "+str(mouse_y))
+            #print("x: "+str(mouse_x)+", y: "+str(mouse_y))
             for place in range(0, 10):
-                print("ix: "+str(itterationX)+", iy: "+str(itterationY))
+                #print("ix: "+str(itterationX)+", iy: "+str(itterationY))
                 if itterationX < mouse_x < itterationX + 75:
                     if itterationY < mouse_y < itterationY + 75:
                         inventory.moveObject(place)
@@ -678,12 +720,12 @@ while True:
                 itterationX += 100
                 if itterationX >= 350:
                     itterationX = 50
-                    print("RESET")
+                    #print("RESET")
                     itterationY += 100
 
                 if place == 9:
                     inventory.returnObj()
-                    print("RETURURRN")
+                    #print("RETURURRN")
 
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
@@ -747,7 +789,7 @@ while True:
 
     if player_angle < 0:
         player_angle += 360
-        #print("flip")
+        # print("flip")
 
 
     if dave.angle < 0:
@@ -755,7 +797,7 @@ while True:
 
     if player_angle > 359:
         player_angle -= 360
-        #print("FLIP")
+        # print("FLIP")
 
     if dave.angle > 359:
         dave.angle -= 360
@@ -772,6 +814,8 @@ while True:
 
     if player_angle < 90 and target_angle > 270:
         player_angle -= (player_angle - target_angle) % 360 / 10
+        #print("WORKS")
+
     elif player_angle > 270 and target_angle < 90:
         player_angle += (target_angle - player_angle) % 360 / 10
         #print("works")
@@ -791,9 +835,12 @@ while True:
     surface.fill((25, 25, 25))
     if gaming:
         tempsurf = pygame.surface.Surface((800, 800))
+        tempsurf.blit(star.image, (400 - player.imageX + star.rect.x, 400 - player.imageY + star.rect.y))
         blitRotate(tempsurf, dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y), dave.angle + 90)
-        firstAnimal.hover()
-        tempsurf.blit(firstAnimal.image, (400 - player.imageX + firstAnimal.rect.x, 400 - player.imageY + firstAnimal.rect.y + (firstAnimal.hoverY * 5)))
+        for i in bearList:
+            if not i.onStar:
+                i.hover()
+            tempsurf.blit(i.image, (400 - player.imageX + i.rect.x, 400 - player.imageY + i.rect.y + (i.hoverY * 5)))
         tempsurf.blit(vision.drawLights(255), (400 - player.imageX, 400 - player.imageY))
         tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (400 - player.imageX, 400 - player.imageY, 800, 800))
@@ -808,7 +855,7 @@ while True:
         if inv:
             inventory.blitInventory()
     else:
-        surface.blit(currentMenu.getMenu(),(0,0))
+        surface.blit(currentMenu.getMenu(), (0, 0))
     surface.blit(update_fps(), (10, 0))
 
     if flashlight.tick():
@@ -816,14 +863,6 @@ while True:
         vision.calculateLights()
 
     if inventory.getHoldPlace() >= 0:
-        # if inventory.getObjectType() == "flashlight":
-        #     pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 17.5, mouse_y - 7.5, 35, 15))
-        #     pygame.draw.rect(surface, (20, 20, 20), (mouse_x - 7.5, mouse_y + 7.5, 15, 40))
-        #
-        # if inventory.getObjectType() == "battery":
-        #     pygame.draw.rect(surface, (150, 150, 150), (mouse_x - 7.5, mouse_y - 7.5, 15, 15))
-        #     pygame.draw.rect(surface, (200, 200, 0), (mouse_x - 17.5, mouse_y - 22.5, 35, 45))
-
         surface.blit(inventory.heldObject.image, (mouse_x - 25, mouse_y - 25))
 
     pygame.display.update()
