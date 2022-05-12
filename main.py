@@ -10,7 +10,7 @@ pygame.init()
 surface = pygame.display.set_mode((800, 800), pygame.RESIZABLE)
 surface.convert_alpha()
 fpsClock = pygame.time.Clock()
-FPS = 30
+FPS = 60
 
 # maskimage = pygame.transform.scale(pygame.image.load('pixil-frame-0.png'), (800, 800))
 # mask = pygame.mask.from_surface(maskimage)
@@ -178,6 +178,12 @@ class Bear(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
         elif self.name == "secondBear":
             self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        elif self.name == "thirdBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        elif self.name == "fourthBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        elif self.name == "fifthBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.centerx, self.rect.centery = centerX, centerY
@@ -200,10 +206,11 @@ class Bear(pygame.sprite.Sprite):
 
 bearList = []
 firstBear = Bear("firstBear", 250, 250)
-secondBear = Bear("secondBear", 100, 100)
-bearList.append(firstBear)
-bearList.append(secondBear)
-
+secondBear = Bear("secondBear", 250, 175)
+thirdBear = Bear("thirdBear", 100, 100)
+fourthBear = Bear("fourthBear", 1000, 1000)
+fifthBear = Bear("fifthBear", 1000, 1000)
+bearList.extend([firstBear, secondBear, thirdBear, fourthBear, fifthBear])
 
 class Inventory:
     def __init__(self):
@@ -286,6 +293,7 @@ class Star(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.x, self.rect.y = 200, 200
+        self.bears = 0
 
 
 star = Star()
@@ -384,32 +392,46 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += yDif
         self.imageX = self.rect.x - abs((self.rect.width - self.image.get_width()) / 2)     # Changes image location to center hitbox
         self.imageY = self.rect.y - abs((self.rect.height - self.image.get_height()) / 2)   # Changes image location to center hitbox
-        for i in bearList:
+        for i in bearList:  # Pick up bear
             if pygame.sprite.collide_mask(self, i) and not i.onStar:
                 inventory.appendObject(i)
                 i.rect.x -= 1000
                 #print("added item")
-        if pygame.sprite.collide_mask(self, star):
+        if pygame.sprite.collide_mask(self, star):  # Player touches Star, check for bears, place in order
             heldBears = inventory.returnBears()
+            counter = 0
             if len(heldBears) != 0:
                 for i in range(len(heldBears)):
-                    if i == 0:
+                    print(star.bears)
+                    if star.bears == 0:
                         heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 225, star.rect.y + 25
-                    if i == 1:
+                        star.bears += 1
+                    elif star.bears == 1:
                         heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 355, star.rect.y + 125
+                        star.bears += 1
+                    elif star.bears == 2:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 290, star.rect.y + 325
+                        star.bears += 1
+                    elif star.bears == 3:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 110, star.rect.y + 310
+                        star.bears += 1
+                    elif star.bears == 4:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 70, star.rect.y + 160
+                        star.bears += 1
+
 
 
     def updateCollisionPosition(self, direction):
-        offset = (self.rect.x - testMap.rect.x, self.rect.y - testMap.rect.y)
+        # offset = (self.rect.x - testMap.rect.x, self.rect.y - testMap.rect.y)
         while pygame.sprite.collide_mask(self, testMap):
             if direction.__contains__('Left'):
-                self.rect.x += self.mask.overlap_mask(testMap.mask, offset).get_rect().width - self.rect.width + 1
+                self.rect.x += self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().width - self.rect.width + 1
             if direction.__contains__('Right'):
-                self.rect.x -= self.mask.overlap_mask(testMap.mask, offset).get_rect().width - self.rect.width + 1
+                self.rect.x -= self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().width - self.rect.width + 1
             if direction.__contains__('Down'):
-                self.rect.y -= self.mask.overlap_mask(testMap.mask, offset).get_rect().height - self.rect.width + 1
+                self.rect.y -= self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().height - self.rect.width + 1
             if direction.__contains__('Up'):
-                self.rect.y += self.mask.overlap_mask(testMap.mask, offset).get_rect().height - self.rect.width + 1
+                self.rect.y += self.mask.overlap_mask(testMap.mask, (0, 0)).get_rect().height - self.rect.width + 1
         self.imageX = self.rect.x - abs((self.rect.width - self.image.get_width()) / 2)     # Changes image location to center hitbox
         self.imageY = self.rect.y - abs((self.rect.height - self.image.get_height()) / 2)   # Changes image location to center hitbox
 
