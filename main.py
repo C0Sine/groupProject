@@ -1,3 +1,5 @@
+import time
+
 import keyboard as keyboard
 import pygame
 import random
@@ -309,8 +311,8 @@ class LightSource(pygame.sprite.Sprite):
         self.width = width
         self.strength = strength
         self.points = []
-        self.mask = None
-        self.rect = None
+        self.mask = star.mask
+        self.rect = star.rect
 
     def changeLocation(self, x, y):
         self.location = [x, y]
@@ -458,18 +460,27 @@ def blitRotate(surf, image, topleft, angle):
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, Type):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
-        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (40, 40))
-        self.mask = pygame.mask.from_surface(self.hitbox)
-        self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
         self.noMove = False
         self.xcol = False
         self.ycol = False
         self.tempseenX, self.tempseenY = 0, 0
         self.angle, self.targetAngle = 0, 0
+        self.type = Type
+        self.time, self.startTime = 0, 0
+        self.inLight = False
+        if self.type == "zombie":
+            self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
+            self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (40, 40))
+            self.mask = pygame.mask.from_surface(self.hitbox)
+            self.rect = self.image.get_rect()
+        elif self.type == "goober":
+            self.image = pygame.transform.scale(pygame.image.load('goober.png'), (40, 40))
+            self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (40, 40))
+            self.mask = pygame.mask.from_surface(self.hitbox)
+            self.rect = self.image.get_rect()
 
     def goToLastSeen(self, LOSCoords, Target):  # Requires a True/False input from checkLOS AND a target
         moveX, moveY = 0, 0
@@ -529,7 +540,7 @@ class Enemy(pygame.sprite.Sprite):
         #print(math.sqrt(math.pow(delx, 2) + math.pow(dely, 2)))
         self.xcol, self.ycol = False, False
         self.rect.centerx += round(delx)
-        if pygame.sprite.collide_mask(self, testMap):  # Move in x direction, move back if col
+        if pygame.sprite.collide_mask(self, testMap) and not self.type == "goober":  # Move in x direction, move back if col
             self.xcol = True
             self.rect.centerx -= round(delx)
             #print("X collision moved back x")
@@ -539,7 +550,7 @@ class Enemy(pygame.sprite.Sprite):
         # else:
         #     self.rect.centery += round(dely)  # Move x and y
         #     print("ADD DELY")
-        if pygame.sprite.collide_mask(self, testMap):  # Check collision for y
+        if pygame.sprite.collide_mask(self, testMap) and not self.type == "goober":  # Check collision for y
             self.ycol = True
             #print("Y collision moved back y")
             if self.xcol:
@@ -553,9 +564,18 @@ class Enemy(pygame.sprite.Sprite):
         # if self.xcol and not self.ycol:
         #     #print("Moved Y but not X")
 
+    def lightTimer(self):
+        if not pygame.sprite.collide_mask(self, vision):
+            self.timer = time.time()
+            #print("subtraction: " + str(self.timer - self.startTime))
+            if int(self.timer - self.startTime) == 2:
+                self.rect.x = -10000
+                self.inLight = False
 
-dave = Enemy()
-dave.rect.x, dave.rect.y = 100, 100
+
+dave = Enemy("goober")
+dave.rect.x, dave.rect.y = 250, 250
+enemList = [dave]
 
 #Menu class
 class Menu:
@@ -813,7 +833,6 @@ while True:
         player_angle += 360
         # print("flip")
 
-
     if dave.angle < 0:
         dave.angle += 360
 
@@ -858,7 +877,23 @@ while True:
     if gaming:
         tempsurf = pygame.surface.Surface((800, 800))
         tempsurf.blit(star.image, (400 - player.imageX + star.rect.x, 400 - player.imageY + star.rect.y))
-        blitRotate(tempsurf, dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y), dave.angle + 90)
+        for i in enemList:
+            i.goToLastSeen(daveLOS.checkLOS(), player)
+            if i.type == "goober":
+                if not pygame.sprite.collide_mask(i, vision):
+                    if not i.inLight:
+                        i.startTime = time.time()
+                        i.inLight = True
+                    i.lightTimer()
+                else:
+                    i.inLight = False
+                if player.rect.centerx > i.rect.centerx:
+                    i.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load('goober.png'), (50, 50)), True, False)
+                else:
+                    i.image = pygame.transform.scale(pygame.image.load('goober.png'), (50, 50))
+                tempsurf.blit(i.image, (400 - player.imageX + i.rect.x, 400 - player.imageY + i.rect.y))
+            elif i.type == "zombie":
+                blitRotate(tempsurf, i.image, ((400 - player.imageX) + i.rect.x, 400 - player.imageY + i.rect.y), i.angle + 90)
         for i in bearList:
             if not i.onStar:
                 i.hover()
@@ -869,7 +904,7 @@ while True:
         surface.blit(tempsurf, (0, 0))
         surface.blit(vision.drawLights(230), (400 - player.imageX, 400 - player.imageY))
         surface.blit(testMap.image, (400 - player.imageX, 400 - player.imageY))
-        dave.goToLastSeen(daveLOS.checkLOS(), player)
+
         # if not pygame.sprite.collide_mask(dave, vision):
         #     surface.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
         blitRotate(surface, player.image, (400, 400), player_angle)
