@@ -481,6 +481,15 @@ while True:
             item=currentMenu.click(pos)
             if item==0:
                 if currentMenu==menu:
+                    clock = pygame.time.Clock()
+                    font2 = pygame.font.SysFont("Jokerman", 48)
+                    string = "A long time ago"
+                    surface.fill((0, 0, 0))
+                    for i in range(len(string)):
+                        text = font2.render(string[i], True, (0, 128, 0))
+                        surface.blit(text, (100 + (font2.size(string[:i])[0]), 200))
+                        pygame.display.update()
+                        clock.tick(15)
                     gaming=True
                     currentMenu=None
             elif item==1:
