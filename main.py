@@ -604,7 +604,7 @@ while True:
                     sys.exit()
             elif item==2:
                 if currentMenu==menu:
-                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude:(what jude did)","Rowen:(what rowen did)","Back"],False,50,(255,255,255))
+                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude: Drove everyone insane","Rowen:(what rowen did)","Back"],False,50,(255,255,255))
                     currentMenu=credits
             elif item==4:
                 if currentMenu==credits:
