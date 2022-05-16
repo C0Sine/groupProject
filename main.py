@@ -158,7 +158,7 @@ class LightSource(pygame.sprite.Sprite):
                     run = False
 
                 else:  # Increment Len
-                    len += 10  # change it to 2 and then check the point behind it if it detects a wall
+                    len += 10 # change it to 2 and then check the point behind it if it detects a wall
             angle += 1
 
         for i in self.points:
@@ -232,24 +232,24 @@ def blitRotate(surf, image, topleft, angle):
     new_rect = rotated_image.get_rect(center=image.get_rect(topleft=topleft).center)
     surf.blit(rotated_image, new_rect.topleft)
 
-    def createLOSLine(self, Target):
-        LOSLine = pygame.draw.line(surface, (0, 0, 0),
-                                   (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
-                                   (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
-        # pygame.draw.line(surface, (0, 0, 0), (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
-        if LOSLine.colliderect(Target):
-            LOSLine = pygame.draw.line(surface, (0, 255, 0),
-                                       (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
-                                       (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
-        # else: LOSLine = pygame.draw.line(surface, (0, 255, 0), (self.rect.x + self.rect.width / 2, self.rect.y +
-        # self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+    # def createLOSLine(self, Target):
+    #     LOSLine = pygame.draw.line(surface, (0, 0, 0),
+    #                                (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
+    #                                (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+    #     # pygame.draw.line(surface, (0, 0, 0), (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+    #     if LOSLine.colliderect(Target):
+    #         LOSLine = pygame.draw.line(surface, (0, 255, 0),
+    #                                    (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
+    #                                    (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
+    #     # else: LOSLine = pygame.draw.line(surface, (0, 255, 0), (self.rect.x + self.rect.width / 2, self.rect.y +
+    #     # self.rect.height / 2), (Target.rect.x + Target.rect.width / 2, Target.rect.y + Target.rect.height / 2))
 
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('fakeEnemy.png'), (40, 40))
-        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (35, 35))
+        self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
+        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (45, 45))
         self.mask = pygame.mask.from_surface(self.hitbox)
         self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
@@ -257,6 +257,7 @@ class Enemy(pygame.sprite.Sprite):
         self.xcol = False
         self.ycol = False
         self.tempseenX, self.tempseenY = 0, 0
+        self.angle, self.targetAngle = 0, 0
 
     def goToLastSeen(self, LOSCoords, Target):  # Requires a True/False input from checkLOS AND a target
         moveX, moveY = 0, 0
@@ -437,6 +438,36 @@ class LOSBullet(pygame.sprite.Sprite):
                 self.target.rect.centery]  # Returns True/False based on if LOS was broken and a last seen location
 
 
+class Item(pygame.sprite.Sprite):
+    def __init__(self, Name, centerX, centerY):
+        pygame.sprite.Sprite.__init__(self)
+        self.name = Name
+        if self.name == "firstBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
+        else:
+            self.name = "flashlight"
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.centerx, self.rect.centery = centerX, centerY
+        self.hoverY = 0
+        self.target = 1
+
+    def hover(self):
+        if self.target == 1:
+            if self.hoverY >= self.target:
+                self.target = -1
+            else:
+                self.hoverY += 0.05
+        elif self.target == -1:
+            if self.hoverY <= self.target:
+                self.target = 1
+            else:
+                self.hoverY -= 0.05
+
+itemList = []
+firstAnimal = Item("firstBear", 110, 110)
+
 daveLOS = LOSBullet(dave, player)
 
 # Fake player is an invisible "Player" used to detect collisions
@@ -568,9 +599,16 @@ while True:
         player_angle += 360
         # print("flip")
 
+
+    if dave.angle < 0:
+        dave.angle += 360
+
     if player_angle > 359:
         player_angle -= 360
         # print("FLIP")
+
+    if dave.angle > 359:
+        dave.angle -= 360
 
     if mouse_x > 400 + (player.rect.width / 2):
         target_angle = 270 - math.degrees(
@@ -579,9 +617,13 @@ while True:
         target_angle = 90 - math.degrees(
             math.atan((mouse_y - 400 - (player.rect.height / 2)) / (mouse_x - 400 - (player.rect.width / 2))))
 
+    if player.rect.centerx > dave.rect.centerx:
+        dave.targetAngle = 270 - math.degrees(math.atan((player.rect.centery - dave.rect.centery) / (player.rect.centerx - dave.rect.centerx)))
+    elif player.rect.centerx < dave.rect.centerx:
+        dave.targetAngle = 90 - math.degrees(math.atan((player.rect.centery - dave.rect.centery) / (player.rect.centerx - dave.rect.centerx)))
+
     if player_angle < 90 and target_angle > 270:
         player_angle -= (player_angle - target_angle) % 360 / 10
-
     elif player_angle > 270 and target_angle < 90:
         player_angle += (target_angle - player_angle) % 360 / 10
         # print("works")
@@ -589,13 +631,23 @@ while True:
     else:
         player_angle -= (player_angle - target_angle) / 10
 
+    if dave.angle < 90 and dave.targetAngle > 270:
+        dave.angle -= (dave.angle - dave.targetAngle) % 360 / 10
+    elif dave.angle > 270 and dave.targetAngle < 90:
+        dave.angle += (dave.angle - dave.targetAngle) % 360 / 10
+    else:
+        dave.angle -= (dave.angle - dave.targetAngle) / 10
+
     if int(player_angle) != int(target_angle):
         vision.changeDirection(int(-(vision.width / 2) - player_angle - 90))
+
     surface.fill((25, 25, 25))
     if gaming:
         tempsurf = pygame.surface.Surface((800, 800))
-        tempsurf.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
-        tempsurf.blit(vision.drawLights(255, 0), (0, 0))
+        blitRotate(tempsurf, dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y), dave.angle + 90)
+        firstAnimal.hover()
+        tempsurf.blit(firstAnimal.image, (400 - player.imageX + firstAnimal.rect.x, 400 - player.imageY + firstAnimal.rect.y + (firstAnimal.hoverY * 5)))
+        tempsurf.blit(vision.drawLights(255), (400 - player.imageX, 400 - player.imageY))
         tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (0, 0, 800, 800))
         surface.blit(vision.drawLights(230, 100), (0, 0))
