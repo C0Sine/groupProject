@@ -112,7 +112,7 @@ class IndoorMap(pygame.sprite.Sprite):
 
 testMap = IndoorMap()
 
-testMap.loadMap('map2.txt')
+testMap.loadMap('chunk1.txt')
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
