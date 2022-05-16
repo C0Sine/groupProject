@@ -32,7 +32,7 @@ xoooooooooooooox
 xoooooooooooooox
 xxxxxxooooxxxxxx
 
-xxxxxxooooxxxxxx
+xoooooooooooooox
 xoooooooooooooox
 xoooooooooooooox
 xooxxxooooxxxoox
@@ -47,7 +47,7 @@ xoooooooooooooox
 xooxxxooooxxxoox
 xoooooooooooooox
 xoooooooooooooox
-xxxxxxxxxxxxxxxx
+xxxxxxxooxxxxxxx
 
 xoooooooooooooox
 xoooooooooooooox
@@ -66,7 +66,7 @@ xoooooooooxoooox
 xxooooooooooooox
 xxxxxxooooxxxxxx
 
-xxxxxxooooxxxxxx
+xoooooooooooooox
 xoooooooooooooox
 xoooooooooooooox
 xoooooooooooooox
@@ -81,7 +81,7 @@ xoooooooooooooox
 xoooooooooooooox
 xoooooooooooooox
 xoooooooooooooox
-xxxxxxooooxxxxxx
+xoooooooooooooox
 
 xxxxxxooooxxxxxx
 xoooooooooooooox
@@ -98,7 +98,7 @@ xooxoooooooocoox
 xoocooooooooxoox
 xoooooooooooooox
 xoooooooooooooox
-xxxxxxooooxxxxxx
+xoooooooooooooox
 
 xxxxxxooooxxxxxx
 xcoooooooooooocx

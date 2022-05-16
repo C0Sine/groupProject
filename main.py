@@ -38,7 +38,8 @@ def parse_file(file):
             for i in range(0, len(string)):
                 items.append(string[i])
 
-        processedArr.append(items)
+        if not items == []:
+            processedArr.append(items)
         print(items)
 
     return processedArr
@@ -112,7 +113,7 @@ class IndoorMap(pygame.sprite.Sprite):
 
 testMap = IndoorMap()
 
-testMap.loadMap('chunk1.txt')
+testMap.loadMap('chunks1-7.txt')
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
