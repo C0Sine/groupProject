@@ -125,6 +125,9 @@ class Flashlight:
     def getPower(self):
         return self.powerMultiplier * self.battery
 
+    def getBattery(self):
+        return self.battery
+
     def tick(self):
         self.ticks += 1
 
@@ -218,6 +221,9 @@ class Inventory:
     def blitInventory(self):
         x = 50
         y = 50
+        pygame.draw.rect(surface, (100, 100, 100), (575, 25, 210, 20))
+        pygame.draw.rect(surface, (0, 255, 0), (580, 30, flashlight.getBattery()/2, 10))
+
         for i in range(1, 10):
 
             pygame.draw.rect(surface, (100, 100, 100), (x, y, 75, 75))
@@ -304,6 +310,8 @@ class LightSource(pygame.sprite.Sprite):
 
         self.mask = pygame.mask.from_surface(temp)
         self.rect = temp.get_rect()
+
+
 
         return temp
 
