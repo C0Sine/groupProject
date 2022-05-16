@@ -30,7 +30,18 @@ def parse_file(file):
             number_strings = line.split()
             numbers = [n for n in number_strings]
             arr.append(numbers)
-    return arr
+    print(arr)
+    processedArr = []
+    for item in arr:
+        items = []
+        for string in item:
+            for i in range(0, len(string)):
+                items.append(string[i])
+
+        processedArr.append(items)
+        print(items)
+
+    return processedArr
 
 
 class Chunk():
@@ -88,6 +99,10 @@ class IndoorMap(pygame.sprite.Sprite):
             for j in range(0, len(arr[0])):
                 if arr[i][j] == 'x':    # x is used to assign a wall, any other character works for empty space
                     pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
+                if arr[i][j] == 'c':    # x is used to assign a pillar, any other character works for empty space
+                    pygame.draw.circle(tempsurf, (0, 0, 0), (j * 25 + 12.5, i * 25 + 12.5), 15)
+                if arr[i][j] == 'f':    # x is used to assign a pillar, any other character works for empty space
+                    pygame.draw.circle(tempsurf, (0, 0, 0), (j * 25 + 25, i * 25 + 25), 50)
         tempsurf.set_colorkey((255, 255, 255))  # sets white to transparent, allowing movement in those areas
         self.image = tempsurf   # sets map to the loaded map
         self.mask = pygame.mask.from_surface(tempsurf)
@@ -97,7 +112,7 @@ class IndoorMap(pygame.sprite.Sprite):
 
 testMap = IndoorMap()
 
-testMap.loadMap('map1.txt')
+testMap.loadMap('map2.txt')
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
@@ -109,7 +124,6 @@ class WallTest(pygame.sprite.Sprite):
 
 temp = pygame.Surface((800,800),pygame.SRCALPHA)
 temp.convert_alpha()
-
 
 
 class Flashlight:
@@ -612,7 +626,7 @@ while True:
                     sys.exit()
             elif item==2:
                 if currentMenu==menu:
-                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude:(what jude did)","Rowen:(what rowen did)","Back"],False,50,(255,255,255))
+                    credits=Menu(["Sam:(what sam did)","Brandon:(what brandon did)","Jude: Drove everyone insane","Rowen:(what rowen did)","Back"],False,50,(255,255,255))
                     currentMenu=credits
             elif item==4:
                 if currentMenu==credits:
