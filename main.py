@@ -306,8 +306,8 @@ class LightSource(pygame.sprite.Sprite):
         self.width = width
         self.strength = strength
         self.points = []
-        self.mask = star.mask
-        self.rect = star.rect
+        self.mask = player.mask
+        self.rect = player.rect
 
     def changeLocation(self, x, y):
         self.location = [x, y]
@@ -325,7 +325,6 @@ class LightSource(pygame.sprite.Sprite):
 
         while angle < self.direction + self.width + 1:
             global player_chunk
-            point = [-1, -1]  # stores current point
             lastLocation = [-1, -1]  # stores previous point so if point is in a wall
             lastLocation[0] = self.location[0]
             lastLocation[1] = self.location[1]
@@ -926,7 +925,7 @@ while True:
             if not i.onStar:
                 i.hover()
             tempsurf.blit(i.image, (400 - player.imageX + i.rect.x, 400 - player.imageY + i.rect.y + (i.hoverY * 5)))
-        tempsurf.blit(vision.drawLights(255), (400 - player.imageX, 400 - player.imageY))
+        tempsurf.blit(vision.drawLights(255, 0), (0, 0))
         tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (0, 0, 800, 800))
         surface.blit(vision.drawLights(230, 100), (0, 0))
@@ -952,7 +951,6 @@ while True:
 
     if flashlight.tick():
         vision.changeStrength(flashlight.getPower())
-        vision.calculateLights()
 
     if inventory.getHoldPlace() >= 0:
         surface.blit(inventory.heldObject.image, (mouse_x - 25, mouse_y - 25))
