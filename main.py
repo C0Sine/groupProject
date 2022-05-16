@@ -30,7 +30,18 @@ def parse_file(file):
             number_strings = line.split()
             numbers = [n for n in number_strings]
             arr.append(numbers)
-    return arr
+    print(arr)
+    processedArr = []
+    for item in arr:
+        items = []
+        for string in item:
+            for i in range(0, len(string) - 1):
+                items.append(string[i])
+
+        processedArr.append(items)
+        print(items)
+
+    return processedArr
 
 
 class Chunk():
@@ -97,7 +108,7 @@ class IndoorMap(pygame.sprite.Sprite):
 
 testMap = IndoorMap()
 
-testMap.loadMap('map1.txt')
+testMap.loadMap('map2.txt')
 
 class WallTest(pygame.sprite.Sprite):
     def __init__(self):
@@ -109,7 +120,6 @@ class WallTest(pygame.sprite.Sprite):
 
 temp = pygame.Surface((800,800),pygame.SRCALPHA)
 temp.convert_alpha()
-
 
 
 class Flashlight:
