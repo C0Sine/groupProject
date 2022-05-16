@@ -35,7 +35,7 @@ def parse_file(file):
     for item in arr:
         items = []
         for string in item:
-            for i in range(0, len(string) - 1):
+            for i in range(0, len(string)):
                 items.append(string[i])
 
         processedArr.append(items)
@@ -99,6 +99,10 @@ class IndoorMap(pygame.sprite.Sprite):
             for j in range(0, len(arr[0])):
                 if arr[i][j] == 'x':    # x is used to assign a wall, any other character works for empty space
                     pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
+                if arr[i][j] == 'c':    # x is used to assign a pillar, any other character works for empty space
+                    pygame.draw.circle(tempsurf, (0, 0, 0), (j * 25 + 12.5, i * 25 + 12.5), 15)
+                if arr[i][j] == 'f':    # x is used to assign a pillar, any other character works for empty space
+                    pygame.draw.circle(tempsurf, (0, 0, 0), (j * 25 + 25, i * 25 + 25), 50)
         tempsurf.set_colorkey((255, 255, 255))  # sets white to transparent, allowing movement in those areas
         self.image = tempsurf   # sets map to the loaded map
         self.mask = pygame.mask.from_surface(tempsurf)
