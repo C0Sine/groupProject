@@ -427,7 +427,7 @@ class LOSBullet(pygame.sprite.Sprite):
                     self.image = pygame.transform.scale(pygame.image.load('LOSBroken.png'), (
                         10, 10))  # Make it so the colliding bullets and everything past appear red
 
-            surface.blit(self.image, ((400 - player.imageX) + self.rect.x, (400 - player.imageY) + self.rect.y))  # Blit an individual bullet, not needed unless testing
+            # surface.blit(self.image, ((400 - player.imageX) + self.rect.x, (400 - player.imageY) + self.rect.y))  # Blit an individual bullet, not needed unless testing
 
             if pygame.sprite.collide_mask(self, self.target) and not lostLOS:
                 self.image = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (10, 10))
