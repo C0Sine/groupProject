@@ -647,7 +647,7 @@ while True:
         blitRotate(tempsurf, dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y), dave.angle + 90)
         firstAnimal.hover()
         tempsurf.blit(firstAnimal.image, (400 - player.imageX + firstAnimal.rect.x, 400 - player.imageY + firstAnimal.rect.y + (firstAnimal.hoverY * 5)))
-        tempsurf.blit(vision.drawLights(255), (400 - player.imageX, 400 - player.imageY))
+        tempsurf.blit(vision.drawLights(255, 0), (0, 0))
         tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (0, 0, 800, 800))
         surface.blit(vision.drawLights(230, 100), (0, 0))
