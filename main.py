@@ -698,8 +698,6 @@ while True:
         player_chunk = player_in_chunk(player.rect.centerx, player.rect.centery)
         testMap.load_close_chunks()
 
-        if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (
-                keyboard.is_pressed('w') or keyboard.is_pressed('Up')):  # Diagonal movement
         if event.type == pygame.MOUSEBUTTONDOWN and inv:
             print("BOOMSHAKALAKA")
             itterationX = 50
