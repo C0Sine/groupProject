@@ -693,11 +693,6 @@ while True:
         if event.type == pygame.MOUSEMOTION:
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
-    if gaming:  # Movement
-        collider = None
-        player_chunk = player_in_chunk(player.rect.centerx, player.rect.centery)
-        testMap.load_close_chunks()
-
         if event.type == pygame.MOUSEBUTTONDOWN and inv:
             print("BOOMSHAKALAKA")
             itterationX = 50
@@ -736,9 +731,16 @@ while True:
                     inventory.returnObj()
                     print("RETURURRN")
 
-
+        print(event.type == pygame.KEYDOWN)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
             inv = not inv
+            print("UP")
+
+    if gaming:  # Movement
+        collider = None
+        player_chunk = player_in_chunk(player.rect.centerx, player.rect.centery)
+        testMap.load_close_chunks()
+
     if gaming:    # Movement
         if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
             player.updatePosition(0 - round(player_speed * 0.707), 0)
