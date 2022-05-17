@@ -1,3 +1,5 @@
+import time
+
 import keyboard as keyboard
 import pygame
 import random
@@ -67,7 +69,7 @@ class Chunk(pygame.sprite.Sprite):
         return self.__str__()
 
 
-class IndoorMap():
+class IndoorMap(pygame.sprite.Sprite):
     def __init__(self):
         mapsize = 7
         self.map_array = []
@@ -86,7 +88,6 @@ class IndoorMap():
                 if player_chunk[0] - 1 <= j.loc[0] <= player_chunk[0] + 1 and player_chunk[1] - 1 <= j.loc[1] <= player_chunk[1] + 1:
                     j.loaded = True
                     self.loaded_chunks.append(j)
-
 
 testMap = IndoorMap()
 
@@ -109,6 +110,192 @@ for i in testMap.map_array:
 light_map_surf.set_colorkey((255, 255, 255))
 light_map_mask = pygame.mask.from_surface(light_map_surf)
 
+
+class Flashlight:
+    def __init__(self, powerMultiplier, battery):
+        self.powerMultiplier = powerMultiplier
+        self.battery = battery
+        self.ticks = 0
+        self.type = "flashlight"
+        self.image = pygame.transform.scale(pygame.image.load('flashlight.png'), (55, 55))
+
+    def recharge(self):
+        self.battery = 400
+        self.ticks = 0
+
+    def getPower(self):
+        return self.powerMultiplier * self.battery
+
+    def tick(self):
+        self.ticks += 1
+
+        if self.ticks % 60 == 0 and self.ticks / 60 > 0:
+            self.battery -= 1
+            if self.battery <= 0:
+                self.battery = 0
+
+            return True
+        return False
+
+    def getTicks(self):
+        return self.ticks
+
+    def type(self):
+        return "flashlight"
+
+
+class Battery:
+
+    def __init__(self):
+        self.power = 400
+        self.type = "battery"
+        self.image = pygame.transform.scale(pygame.image.load('battery.png'), (50, 50))
+
+    def type(self):
+        return "battery"
+
+
+class Blank:
+
+    def __init__(self):
+        self.blank = True
+        self.image = pygame.transform.scale(pygame.image.load('LOSTest.png'), (1, 1))
+        self.type = "blank"
+
+    def type(self):
+        return "blank"
+
+
+class Bear(pygame.sprite.Sprite):
+    def __init__(self, Name, centerX, centerY):
+        pygame.sprite.Sprite.__init__(self)
+        self.name = Name
+        self.onStar = False
+        if self.name == "firstBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        elif self.name == "secondBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        elif self.name == "thirdBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        elif self.name == "fourthBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        elif self.name == "fifthBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (65, 65))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.centerx, self.rect.centery = centerX, centerY
+        self.hoverY = 0
+        self.target = 1
+        self.type = "bear"
+
+    def hover(self):
+        if self.target == 1:
+            if self.hoverY >= self.target:
+                self.target = -1
+            else:
+                self.hoverY += 0.05
+        elif self.target == -1:
+            if self.hoverY <= self.target:
+                self.target = 1
+            else:
+                self.hoverY -= 0.05
+
+
+bearList = []
+firstBear = Bear("firstBear", 250, 250)
+secondBear = Bear("secondBear", 250, 175)
+thirdBear = Bear("thirdBear", 100, 100)
+fourthBear = Bear("fourthBear", 1000, 1000)
+fifthBear = Bear("fifthBear", 1000, 1000)
+bearList.extend([firstBear, secondBear, thirdBear, fourthBear, fifthBear])
+
+class Inventory:
+    def __init__(self):
+        self.items = [Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank()]
+        self.heldObjectPos = -1
+        self.heldObject = Blank()
+
+    def appendObject(self, obj):
+        for i in range(0, 9):
+            if self.items[i].type == "blank":
+                self.items[i] = obj
+                break
+
+    def moveObject(self, place):
+        if self.items[place].type == "blank":
+            self.items[place] = self.heldObject
+
+        else:
+            self.items[self.heldObjectPos] = self.heldObject
+
+        self.heldObjectPos = -1
+        self.heldObject = Blank()
+
+    def returnObj(self):
+        self.items[self.heldObjectPos] = self.heldObject
+        self.heldObject = Blank()
+        self.heldObjectPos = -1
+        #print("YEAH BOIIII")
+
+    def holdingObject(self, place):
+        if not self.items[place].type == "blank":
+            self.heldObjectPos = place
+            self.heldObject = self.items[place]
+            self.items[place] = Blank()
+            #print(self.items)
+
+    def getHoldPlace(self):
+        return self.heldObjectPos
+
+    def placeObject(self, place, obj):
+        self.items[place] = obj
+
+    def getObjectType(self):
+        return self.heldObject.type
+
+    def returnBears(self):
+        returnList = []
+        for i in self.items:
+            if i.type == "bear":
+                i.onStar = True
+                returnList.append(i)
+                i.type = "blank"
+        return returnList
+
+    def blitInventory(self):
+        x = 50
+        y = 50
+        for i in range(1, 10):
+
+            pygame.draw.rect(surface, (100, 100, 100), (x, y, 75, 75))
+            pygame.draw.rect(surface, (50, 50, 50), (x + 7, y + 7, 61, 61))
+
+            if self.items[i - 1].type == "flashlight":
+                surface.blit(self.items[i - 1].image, (x + 10, y + 12))
+            elif self.items[i - 1].type == "bear":
+                surface.blit(self.items[i - 1].image, (x + 5, y + 5))
+            elif self.items[i - 1].type == "battery":
+                surface.blit(self.items[i - 1].image, (x + 13, y + 10))
+
+            x += 100
+            if i % 3 == 0:
+                y += 100
+                x = 50
+
+
+class Star(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.transform.scale(pygame.image.load("fivePointStar.png"), (425, 425))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x, self.rect.y = 200, 200
+        self.bears = 0
+
+
+star = Star()
+
+
 class LightSource(pygame.sprite.Sprite):
     def __init__(self, location, direction, width, strength=None):
         pygame.sprite.Sprite.__init__(self)
@@ -119,14 +306,17 @@ class LightSource(pygame.sprite.Sprite):
         self.width = width
         self.strength = strength
         self.points = []
-        self.mask = None
-        self.rect = None
+        self.mask = player.mask
+        self.rect = player.rect
 
     def changeLocation(self, x, y):
         self.location = [x, y]
 
     def changeDirection(self, direction):
         self.direction = direction
+
+    def changeStrength(self, new):
+        self.strength = new
 
     def calculateLights(self):
         self.points = []
@@ -135,7 +325,6 @@ class LightSource(pygame.sprite.Sprite):
 
         while angle < self.direction + self.width + 1:
             global player_chunk
-            point = [-1, -1]  # stores current point
             lastLocation = [-1, -1]  # stores previous point so if point is in a wall
             lastLocation[0] = self.location[0]
             lastLocation[1] = self.location[1]
@@ -158,7 +347,10 @@ class LightSource(pygame.sprite.Sprite):
                     run = False
 
                 else:  # Increment Len
-                    len += 10 # change it to 2 and then check the point behind it if it detects a wall
+                    if self.strength - len < 10:
+                        len += self.strength - len + 1
+                    else:
+                        len += 10
             angle += 1
 
         for i in self.points:
@@ -205,10 +397,36 @@ class Player(pygame.sprite.Sprite):
         # Method that runs every tick to update the position if velX/velY != 0
         self.rect.x += xDif
         self.rect.y += yDif
-        self.imageX = self.rect.x - abs(
-            (self.rect.width - self.image.get_width()) / 2)  # Changes image location to center hitbox
-        self.imageY = self.rect.y - abs(
-            (self.rect.height - self.image.get_height()) / 2)  # Changes image location to center hitbox
+        self.imageX = self.rect.x - abs((self.rect.width - self.image.get_width()) / 2)     # Changes image location to center hitbox
+        self.imageY = self.rect.y - abs((self.rect.height - self.image.get_height()) / 2)   # Changes image location to center hitbox
+        for i in bearList:  # Pick up bear
+            if pygame.sprite.collide_mask(self, i) and not i.onStar:
+                inventory.appendObject(i)
+                i.rect.x -= 1000
+                #print("added item")
+        if pygame.sprite.collide_mask(self, star):  # Player touches Star, check for bears, place in order
+            heldBears = inventory.returnBears()
+            counter = 0
+            if len(heldBears) != 0:
+                for i in range(len(heldBears)):
+                    print(star.bears)
+                    if star.bears == 0:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 225, star.rect.y + 25
+                        star.bears += 1
+                    elif star.bears == 1:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 355, star.rect.y + 125
+                        star.bears += 1
+                    elif star.bears == 2:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 290, star.rect.y + 325
+                        star.bears += 1
+                    elif star.bears == 3:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 110, star.rect.y + 310
+                        star.bears += 1
+                    elif star.bears == 4:
+                        heldBears[i].rect.centerx, heldBears[i].rect.centery = star.rect.x + 70, star.rect.y + 160
+                        star.bears += 1
+
+
 
     def updateCollisionPosition(self, direction, collider):
         while pygame.sprite.collide_mask(self, collider):
@@ -232,6 +450,8 @@ def blitRotate(surf, image, topleft, angle):
     new_rect = rotated_image.get_rect(center=image.get_rect(topleft=topleft).center)
     surf.blit(rotated_image, new_rect.topleft)
 
+
+# Menu class
     # def createLOSLine(self, Target):
     #     LOSLine = pygame.draw.line(surface, (0, 0, 0),
     #                                (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
@@ -246,18 +466,27 @@ def blitRotate(surf, image, topleft, angle):
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, Type):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
-        self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (45, 45))
-        self.mask = pygame.mask.from_surface(self.hitbox)
-        self.rect = self.image.get_rect()
         self.lastSeenX, self.lastSeenY = 0, 0
         self.noMove = False
         self.xcol = False
         self.ycol = False
         self.tempseenX, self.tempseenY = 0, 0
         self.angle, self.targetAngle = 0, 0
+        self.type = Type
+        self.time, self.startTime = 0, 0
+        self.inLight = False
+        if self.type == "zombie":
+            self.image = pygame.transform.scale(pygame.image.load('zombrotest.png'), (60, 60))
+            self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (40, 40))
+            self.mask = pygame.mask.from_surface(self.hitbox)
+            self.rect = self.image.get_rect()
+        elif self.type == "goober":
+            self.image = pygame.transform.scale(pygame.image.load('goober.png'), (40, 40))
+            self.hitbox = pygame.transform.scale(pygame.image.load('LOSTarget.png'), (40, 40))
+            self.mask = pygame.mask.from_surface(self.hitbox)
+            self.rect = self.image.get_rect()
 
     def goToLastSeen(self, LOSCoords, Target):  # Requires a True/False input from checkLOS AND a target
         moveX, moveY = 0, 0
@@ -343,12 +572,20 @@ class Enemy(pygame.sprite.Sprite):
         # if self.xcol and not self.ycol:
         #     #print("Moved Y but not X")
 
+    def lightTimer(self):
+        if not pygame.sprite.collide_mask(self, vision):
+            self.timer = time.time()
+            #print("subtraction: " + str(self.timer - self.startTime))
+            if int(self.timer - self.startTime) == 2:
+                self.rect.x = -10000
+                self.inLight = False
 
-dave = Enemy()
-dave.rect.x, dave.rect.y = 80, 80
 
+dave = Enemy("goober")
+dave.rect.x, dave.rect.y = 250, 250
+enemList = [dave]
 
-# Menu class
+#Menu class
 class Menu:
     output = pygame.Surface((800, 800))
 
@@ -438,36 +675,6 @@ class LOSBullet(pygame.sprite.Sprite):
                 self.target.rect.centery]  # Returns True/False based on if LOS was broken and a last seen location
 
 
-class Item(pygame.sprite.Sprite):
-    def __init__(self, Name, centerX, centerY):
-        pygame.sprite.Sprite.__init__(self)
-        self.name = Name
-        if self.name == "firstBear":
-            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
-        else:
-            self.name = "flashlight"
-            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
-        self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
-        self.rect.centerx, self.rect.centery = centerX, centerY
-        self.hoverY = 0
-        self.target = 1
-
-    def hover(self):
-        if self.target == 1:
-            if self.hoverY >= self.target:
-                self.target = -1
-            else:
-                self.hoverY += 0.05
-        elif self.target == -1:
-            if self.hoverY <= self.target:
-                self.target = 1
-            else:
-                self.hoverY -= 0.05
-
-itemList = []
-firstAnimal = Item("firstBear", 110, 110)
-
 daveLOS = LOSBullet(dave, player)
 
 # Fake player is an invisible "Player" used to detect collisions
@@ -477,6 +684,11 @@ playerspeed = 3
 testMap.load_close_chunks()
 vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
 vision.calculateLights()
+
+flashlight = Flashlight(1, 400)
+battery = Battery()
+
+vision.changeStrength(flashlight.getPower())
 
 player_speed = 3
 frame = 0
@@ -497,6 +709,10 @@ def collide_chunk():
             return i
     return None
 
+inv = False
+inventory = Inventory()
+inventory.placeObject(8, flashlight)
+inventory.placeObject(7, battery)
 
 while True:
     frame += 1
@@ -528,17 +744,59 @@ while True:
                 if currentMenu == credits:
                     currentMenu = menu
                     currentMenu.create()
-                    print("aaa")
+                    # print("aaa")
         if event.type == pygame.MOUSEMOTION:
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
-    if gaming:  # Movement
+        if event.type == pygame.MOUSEBUTTONDOWN and inv:
+            #print("BOOMSHAKALAKA")
+            itterationX = 50
+            itterationY = 50
+            for place in range(0, 9):
+                if itterationX < mouse_x < itterationX + 75:
+                    if itterationY < mouse_y < itterationY + 75:
+                        #print("DOO DOO")
+                        inventory.holdingObject(place)
+                        break
+
+                itterationX += 100
+                if itterationX >= 350:
+                    itterationX = 50
+                    itterationY += 100
+                    #print("RESET")
+
+        if event.type == pygame.MOUSEBUTTONUP and inv and inventory.heldObjectPos != -1:
+            itterationX = 50
+            itterationY = 50
+            #print("x: "+str(mouse_x)+", y: "+str(mouse_y))
+            for place in range(0, 10):
+                #print("ix: "+str(itterationX)+", iy: "+str(itterationY))
+                if itterationX < mouse_x < itterationX + 75:
+                    if itterationY < mouse_y < itterationY + 75:
+                        inventory.moveObject(place)
+                        break
+
+                itterationX += 100
+                if itterationX >= 350:
+                    itterationX = 50
+                    #print("RESET")
+                    itterationY += 100
+
+                if place == 9:
+                    inventory.returnObj()
+                    #print("RETURURRN")
+
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+            inv = not inv
+
+
+    if gaming:    # Movement
         collider = None
         player_chunk = player_in_chunk(player.rect.centerx, player.rect.centery)
         testMap.load_close_chunks()
 
-        if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (
-                keyboard.is_pressed('w') or keyboard.is_pressed('Up')):  # Diagonal movement
+        if (keyboard.is_pressed('a') or keyboard.is_pressed('Left')) and (keyboard.is_pressed('w') or keyboard.is_pressed('Up')):   # Diagonal movement
             player.updatePosition(0 - round(player_speed * 0.707), 0)
             if collide_chunk() is not None:
                 player.updateCollisionPosition('Left', collide_chunk())
@@ -599,7 +857,6 @@ while True:
         player_angle += 360
         # print("flip")
 
-
     if dave.angle < 0:
         dave.angle += 360
 
@@ -624,6 +881,8 @@ while True:
 
     if player_angle < 90 and target_angle > 270:
         player_angle -= (player_angle - target_angle) % 360 / 10
+        #print("WORKS")
+
     elif player_angle > 270 and target_angle < 90:
         player_angle += (target_angle - player_angle) % 360 / 10
         # print("works")
@@ -644,9 +903,28 @@ while True:
     surface.fill((25, 25, 25))
     if gaming:
         tempsurf = pygame.surface.Surface((800, 800))
-        blitRotate(tempsurf, dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y), dave.angle + 90)
-        firstAnimal.hover()
-        tempsurf.blit(firstAnimal.image, (400 - player.imageX + firstAnimal.rect.x, 400 - player.imageY + firstAnimal.rect.y + (firstAnimal.hoverY * 5)))
+        tempsurf.blit(star.image, (400 - player.imageX + star.rect.x, 400 - player.imageY + star.rect.y))
+        for i in enemList:
+            i.goToLastSeen(daveLOS.checkLOS(), player)
+            if i.type == "goober":
+                if not pygame.sprite.collide_mask(i, vision):
+                    if not i.inLight:
+                        i.startTime = time.time()
+                        i.inLight = True
+                    i.lightTimer()
+                else:
+                    i.inLight = False
+                if player.rect.centerx > i.rect.centerx:
+                    i.image = pygame.transform.flip(pygame.transform.scale(pygame.image.load('goober.png'), (50, 50)), True, False)
+                else:
+                    i.image = pygame.transform.scale(pygame.image.load('goober.png'), (50, 50))
+                tempsurf.blit(i.image, (400 - player.imageX + i.rect.x, 400 - player.imageY + i.rect.y))
+            elif i.type == "zombie":
+                blitRotate(tempsurf, i.image, ((400 - player.imageX) + i.rect.x, 400 - player.imageY + i.rect.y), i.angle + 90)
+        for i in bearList:
+            if not i.onStar:
+                i.hover()
+            tempsurf.blit(i.image, (400 - player.imageX + i.rect.x, 400 - player.imageY + i.rect.y + (i.hoverY * 5)))
         tempsurf.blit(vision.drawLights(255, 0), (0, 0))
         tempsurf.set_colorkey((0, 0, 0))
         pygame.draw.rect(surface, (255, 255, 255), (0, 0, 800, 800))
@@ -664,8 +942,18 @@ while True:
         # if not pygame.sprite.collide_mask(dave, vision):
         #     surface.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
         blitRotate(surface, player.image, (400, 400), player_angle)
+        surface.blit(update_fps(), (10, 0))
+        if inv:
+            inventory.blitInventory()
     else:
         surface.blit(currentMenu.getMenu(), (0, 0))
     surface.blit(update_fps(), (10, 0))
+
+    if flashlight.tick():
+        vision.changeStrength(flashlight.getPower())
+
+    if inventory.getHoldPlace() >= 0:
+        surface.blit(inventory.heldObject.image, (mouse_x - 25, mouse_y - 25))
+
     pygame.display.update()
     fpsClock.tick(FPS)
