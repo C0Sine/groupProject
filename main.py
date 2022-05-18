@@ -881,6 +881,7 @@ while True:
                         ["Sam: very little", "Brandon:(what brandon did)", "Jude: Flashlight and Inventory Mechanics",
                          "Rowen:(what rowen did)", "Back"], False, 40, (255, 255, 255))
                     currentMenu = credits
+                    currentMenu.create()
                 elif currentMenu == respawnMenu:
                     pygame.quit()
                     print('l8r sk8r')
