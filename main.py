@@ -752,7 +752,7 @@ testMap.load_close_chunks()
 vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
 vision.calculateLights()
 
-flashlight = Flashlight(1, 300)
+flashlight = Flashlight(1, 400)
 battery = Battery()
 
 vision.changeStrength(flashlight.getPower())
