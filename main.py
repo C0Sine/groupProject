@@ -3,6 +3,7 @@ import pygame
 import random
 import sys
 import math
+import time
 
 from pygame import QUIT
 
@@ -32,7 +33,7 @@ def parse_file(file):
             number_strings = line.split()
             numbers = [n for n in number_strings]
             arr.append(numbers)
-    print(arr)
+    # print(arr)
     processedArr = []
     for item in arr:
         items = []
@@ -42,7 +43,7 @@ def parse_file(file):
 
         if not items == []:
             processedArr.append(items)
-        print(items)
+        # print(items)
 
     return processedArr
 
@@ -223,7 +224,7 @@ fourthBear = Bear("fourthBear", 1000, 1000)
 fifthBear = Bear("fifthBear", 1000, 1000)
 bearList.extend([firstBear, secondBear, thirdBear, fourthBear, fifthBear])
 
-flashlight = Flashlight(1, 300)
+flashlight = Flashlight(1, 200)
 battery = Battery()
 
 
@@ -240,11 +241,13 @@ class Inventory:
                 break
 
     def moveObject(self, place):
+
+        print(self.items[place].type)
         if self.items[place].type == "blank":
             self.items[place] = self.heldObject
             print("BOO")
 
-        elif self.items[place].type() == "flashlight" and self.heldObject.type() == "battery":
+        elif self.items[place].type == "flashlight" and self.heldObject.type == "battery":
             flashlight.recharge()
             print("RECHARGE")
 
@@ -742,7 +745,7 @@ testMap.load_close_chunks()
 vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
 vision.calculateLights()
 
-flashlight = Flashlight(1, 400)
+flashlight = Flashlight(1, 300)
 battery = Battery()
 
 vision.changeStrength(flashlight.getPower())
