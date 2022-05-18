@@ -56,15 +56,17 @@ class Chunk(pygame.sprite.Sprite):
     def __init__(self, loc):
         pygame.sprite.Sprite.__init__(self)
         self.loc = loc
+        print(loc)
         self.loaded = False
 
-        self.area = parse_file('chunks\\chunk(0, 0).txt')
+        self.area = parse_file('chunks\\chunk(' + str(self.loc[0]) + ', ' + str(self.loc[1]) + ').txt')
 
         tempsurf = pygame.Surface((400, 400))
-        for i in range(16):
-            for j in range(16):
+        for i in range(0, 16):
+            for j in range(0, 16):
                 if self.area[i][j] == 'x':
                     pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
+                    print("SQ")
                 else:
                     pygame.draw.rect(tempsurf, (255, 255, 255), (j * 25, i * 25, 25, 25))
         tempsurf.set_colorkey((255, 255, 255))
@@ -807,8 +809,8 @@ while True:
                     sys.exit()
             elif item == 2:
                 if currentMenu == menu:
-                    credits = Menu(["Sam:(what sam did)", "Brandon:(what brandon did)", "Jude:(what jude did)",
-                                    "Rowen:(what rowen did)", "Back"], False, 50, (255, 255, 255))
+                    credits = Menu(["Sam:(what sam did)", "Brandon:(what brandon did)", "Jude: Flashlight and Inventory Mechanics",
+                                    "Rowen:(what rowen did)", "Back"], False, 40, (255, 255, 255))
                     currentMenu = credits
             elif item == 4:
                 if currentMenu == credits:
