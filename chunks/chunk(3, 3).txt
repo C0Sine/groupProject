@@ -1,11 +1,11 @@
 xxxxxxooooxxxxxx
 ooooooooooooooox
 ooooooooooooooox
-oooooxxxxoooooox
-oooooooooxooooox
-oooooxxxxoooooox
-oooooooooxoooooo
-oooooxxxxooooooo
+ooooooooooooooox
+ooooooooooooooox
+ooooooooooooooox
+oooooooooooooooo
+oooooooooooooooo
 oooooooooooooooo
 oooooooooooooooo
 ooooooooooooooox
