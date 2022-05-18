@@ -1,16 +1,16 @@
-x	x	x	x	x	x	x	x	x	x	x	x	x	x	x	x
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
-x	o	o	o	o	o	o	o	o	o	o	o	o	o	o	o
+xoooooooooooooox
+xoooooooooooooox
+xoocoooooooocoox
+xoooooooooooooox
+xoooooooooooooox
+xoocoooooooocoox
+xoooooooooooooox
+xoooooooooooooox
+xoocoooooooocoox
+xoooooooooooooox
+xoooooooooooooox
+xoocoooooooocoox
+xoooooooooooooox
+xoooooooooooooox
+xoooooooooooooox
+xoooooooooooooox
