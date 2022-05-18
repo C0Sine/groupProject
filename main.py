@@ -60,14 +60,19 @@ class Chunk(pygame.sprite.Sprite):
         self.loaded = False
 
         self.area = parse_file('chunks\\chunk(' + str(self.loc[0]) + ', ' + str(self.loc[1]) + ').txt')
+        print(self.area)
 
         tempsurf = pygame.Surface((400, 400))
         for i in range(0, 16):
             for j in range(0, 16):
-                if self.area[i][j] == 'x':
+
+                if self.area[i][j] == 'c':
+                    pygame.draw.circle(tempsurf, (0, 0, 0), (j * 25 + 12.5, i * 25 + 12.5), 12.5)
+
+                elif self.area[i][j] == 'x':
                     pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
-                    print("SQ")
-                else:
+
+                elif self.area[i][j] == 'o':
                     pygame.draw.rect(tempsurf, (255, 255, 255), (j * 25, i * 25, 25, 25))
         tempsurf.set_colorkey((255, 255, 255))
         self.image = tempsurf
@@ -858,10 +863,8 @@ while True:
                     inventory.returnObj()
                     #print("RETURURRN")
 
-        print(event.type == pygame.KEYDOWN)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
             inv = not inv
-            print("UP")
 
 
     if gaming:    # Movement
