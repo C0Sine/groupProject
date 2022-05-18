@@ -56,11 +56,11 @@ class Chunk(pygame.sprite.Sprite):
     def __init__(self, loc):
         pygame.sprite.Sprite.__init__(self)
         self.loc = loc
-        print(loc)
+        #print(loc)
         self.loaded = False
 
         self.area = parse_file('chunks\\chunk(' + str(self.loc[0]) + ', ' + str(self.loc[1]) + ').txt')
-        print(self.area)
+        #print(self.area)
 
         tempsurf = pygame.Surface((400, 400))
         for i in range(0, 16):
@@ -299,8 +299,7 @@ class Inventory:
     def blitInventory(self):
         x = 50
         y = 50
-        pygame.draw.rect(surface, (100, 100, 100), (575, 25, 210, 20))
-        pygame.draw.rect(surface, (0, 255, 0), (580, 30, flashlight.getBattery()/2, 10))
+
 
         for i in range(1, 10):
 
@@ -326,7 +325,7 @@ class Star(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(pygame.image.load("fivePointStar.png"), (425, 425))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.x, self.rect.y = 200, 200
+        self.rect.x, self.rect.y = 1175, 1200
         self.bears = 0
 
 
@@ -425,6 +424,7 @@ class Player(pygame.sprite.Sprite):
         self.hitbox = pygame.transform.scale(pygame.image.load('hitbox.png'), (30, 30))
         self.mask = pygame.mask.from_surface(self.hitbox)
         self.rect = self.hitbox.get_rect()
+        self.health = 5
         # X and Y position variables for player movement
         self.rect.x, self.rect.y = 100, 100
         self.imageX = self.rect.x - abs(
@@ -481,6 +481,13 @@ class Player(pygame.sprite.Sprite):
             (self.rect.width - self.image.get_width()) / 2)  # Changes image location to center hitbox
         self.imageY = self.rect.y - abs(
             (self.rect.height - self.image.get_height()) / 2)  # Changes image location to center hitbox
+
+    def blitStatus(self):
+        pygame.draw.rect(surface, (100, 100, 100), (575, 60, 210, 20))
+        pygame.draw.rect(surface, (0, 255, 0), (580, 65, flashlight.getBattery()/2, 10))
+        heart = pygame.transform.scale(pygame.image.load("playerHeart.png"), (40, 40))
+        for i in range(self.health):
+            surface.blit(heart, (575 + (i * 40), 15))
 
 
 def blitRotate(surf, image, topleft, angle):
@@ -556,24 +563,24 @@ class Enemy(pygame.sprite.Sprite):
         if moveX == 0 and moveY != 0:
             delx = 0
             if moveY > 0:
-                dely = 2
+                dely = 1
             else:
-                dely = -2
-            if 0 < moveY < 2:
+                dely = -1
+            if 0 < moveY < 1:
                 dely = moveY
         if moveY == 0 and moveX != 0:
-            delx, dely = 2, 0
+            delx, dely = 1, 0
             if moveX > 0:
-                delx = 2
+                delx = 1
             else:
-                delx = -2
-            if 0 < moveX < 2:
+                delx = -1
+            if 0 < moveX < 1:
                 delx = moveX
         if moveX != 0 and moveY != 0:
             if moveX < 0:
-                delx = (2 / math.sqrt(1 + math.pow(moveY / moveX, 2))) * -1
+                delx = (1 / math.sqrt(1 + math.pow(moveY / moveX, 2))) * -1
             else:
-                delx = (2 / math.sqrt(1 + math.pow(moveY / moveX, 2)))
+                delx = (1 / math.sqrt(1 + math.pow(moveY / moveX, 2)))
             dely = delx * (moveY / moveX)
         if pygame.sprite.collide_mask(self, Target):  # Don't move if Enemy collides with Target
             delx, dely = 0, 0
@@ -618,7 +625,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.inLight = False
 
 
-dave = Enemy("goober")
+dave = Enemy("zombie")
 dave.rect.x, dave.rect.y = 250, 250
 enemList = [dave]
 
@@ -752,7 +759,7 @@ testMap.load_close_chunks()
 vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
 vision.calculateLights()
 
-flashlight = Flashlight(1, 400)
+flashlight = Flashlight(1, 300)
 battery = Battery()
 
 vision.changeStrength(flashlight.getPower())
@@ -1019,6 +1026,7 @@ while True:
         #     surface.blit(dave.image, ((400 - player.imageX) + dave.rect.x, 400 - player.imageY + dave.rect.y))
         blitRotate(surface, player.image, (400, 400), player_angle)
         surface.blit(update_fps(), (10, 0))
+        player.blitStatus()
         if inv:
             inventory.blitInventory()
     else:
