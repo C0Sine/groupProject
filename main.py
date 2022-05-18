@@ -1,10 +1,9 @@
-import time
-
 import keyboard as keyboard
 import pygame
 import random
 import sys
 import math
+import time
 
 from pygame import QUIT
 
@@ -34,7 +33,19 @@ def parse_file(file):
             number_strings = line.split()
             numbers = [n for n in number_strings]
             arr.append(numbers)
-    return arr
+    # print(arr)
+    processedArr = []
+    for item in arr:
+        items = []
+        for string in item:
+            for i in range(0, len(string)):
+                items.append(string[i])
+
+        if not items == []:
+            processedArr.append(items)
+        # print(items)
+
+    return processedArr
 
 
 def player_in_chunk(x, y):
@@ -89,6 +100,7 @@ class IndoorMap(pygame.sprite.Sprite):
                     j.loaded = True
                     self.loaded_chunks.append(j)
 
+
 testMap = IndoorMap()
 
 
@@ -120,11 +132,14 @@ class Flashlight:
         self.image = pygame.transform.scale(pygame.image.load('flashlight.png'), (55, 55))
 
     def recharge(self):
-        self.battery = 400
-        self.ticks = 0
+        self.battery = 401
+        self.ticks = 59
 
     def getPower(self):
         return self.powerMultiplier * self.battery
+
+    def getBattery(self):
+        return self.battery
 
     def tick(self):
         self.ticks += 1
@@ -209,6 +224,10 @@ fourthBear = Bear("fourthBear", 1000, 1000)
 fifthBear = Bear("fifthBear", 1000, 1000)
 bearList.extend([firstBear, secondBear, thirdBear, fourthBear, fifthBear])
 
+flashlight = Flashlight(1, 200)
+battery = Battery()
+
+
 class Inventory:
     def __init__(self):
         self.items = [Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank(), Blank()]
@@ -222,11 +241,19 @@ class Inventory:
                 break
 
     def moveObject(self, place):
+
+        print(self.items[place].type)
         if self.items[place].type == "blank":
             self.items[place] = self.heldObject
+            print("BOO")
+
+        elif self.items[place].type == "flashlight" and self.heldObject.type == "battery":
+            flashlight.recharge()
+            print("RECHARGE")
 
         else:
             self.items[self.heldObjectPos] = self.heldObject
+            print("FAKE")
 
         self.heldObjectPos = -1
         self.heldObject = Blank()
@@ -265,6 +292,9 @@ class Inventory:
     def blitInventory(self):
         x = 50
         y = 50
+        pygame.draw.rect(surface, (100, 100, 100), (575, 25, 210, 20))
+        pygame.draw.rect(surface, (0, 255, 0), (580, 30, flashlight.getBattery()/2, 10))
+
         for i in range(1, 10):
 
             pygame.draw.rect(surface, (100, 100, 100), (x, y, 75, 75))
@@ -372,6 +402,8 @@ class LightSource(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(temp)
         self.rect = temp.get_rect()
 
+
+
         return temp
 
     # def makeLayer(self):
@@ -450,8 +482,6 @@ def blitRotate(surf, image, topleft, angle):
     new_rect = rotated_image.get_rect(center=image.get_rect(topleft=topleft).center)
     surf.blit(rotated_image, new_rect.topleft)
 
-
-# Menu class
     # def createLOSLine(self, Target):
     #     LOSLine = pygame.draw.line(surface, (0, 0, 0),
     #                                (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2),
@@ -675,6 +705,36 @@ class LOSBullet(pygame.sprite.Sprite):
                 self.target.rect.centery]  # Returns True/False based on if LOS was broken and a last seen location
 
 
+class Item(pygame.sprite.Sprite):
+    def __init__(self, Name, centerX, centerY):
+        pygame.sprite.Sprite.__init__(self)
+        self.name = Name
+        if self.name == "firstBear":
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
+        else:
+            self.name = "flashlight"
+            self.image = pygame.transform.scale(pygame.image.load(self.name + ".png"), (80, 80))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.centerx, self.rect.centery = centerX, centerY
+        self.hoverY = 0
+        self.target = 1
+
+    def hover(self):
+        if self.target == 1:
+            if self.hoverY >= self.target:
+                self.target = -1
+            else:
+                self.hoverY += 0.05
+        elif self.target == -1:
+            if self.hoverY <= self.target:
+                self.target = 1
+            else:
+                self.hoverY -= 0.05
+
+itemList = []
+firstAnimal = Item("firstBear", 110, 110)
+
 daveLOS = LOSBullet(dave, player)
 
 # Fake player is an invisible "Player" used to detect collisions
@@ -685,9 +745,10 @@ testMap.load_close_chunks()
 vision = LightSource([player.rect.centerx, player.rect.centery], 155, 60, 300)
 vision.calculateLights()
 
-flashlight = Flashlight(1, 400)
+flashlight = Flashlight(1, 300)
 battery = Battery()
 
+vision.changeStrength(flashlight.getPower())
 vision.changeStrength(flashlight.getPower())
 
 player_speed = 3
@@ -695,8 +756,17 @@ frame = 0
 mouse_x, mouse_y = 0, 0
 player_angle = 0
 target_angle = 0
+
+inv = False
+inventory = Inventory()
+inventory.placeObject(8, flashlight)
+inventory.placeObject(7, battery)
+
+#game pause variable
 # game pause variable
 gaming = False
+# game pause variable
+
 
 menu = Menu(["Play", "Close", "Credits"], True, 50, (255, 255, 255))
 credits = None
@@ -786,9 +856,10 @@ while True:
                     inventory.returnObj()
                     #print("RETURURRN")
 
-
+        print(event.type == pygame.KEYDOWN)
         if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
             inv = not inv
+            print("UP")
 
 
     if gaming:    # Movement
@@ -951,6 +1022,7 @@ while True:
 
     if flashlight.tick():
         vision.changeStrength(flashlight.getPower())
+        vision.calculateLights()
 
     if inventory.getHoldPlace() >= 0:
         surface.blit(inventory.heldObject.image, (mouse_x - 25, mouse_y - 25))
