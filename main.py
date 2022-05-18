@@ -1034,7 +1034,7 @@ while True:
             if player.rect.centerx > i.rect.centerx:
                 i.targetAngle = 270 - math.degrees(
                     math.atan((player.rect.centery - i.rect.centery) / (player.rect.centerx - i.rect.centerx)))
-            elif player.rect.centerx < dave.rect.centerx:
+            elif player.rect.centerx < i.rect.centerx:
                 i.targetAngle = 90 - math.degrees(
                     math.atan((player.rect.centery - i.rect.centery) / (player.rect.centerx - i.rect.centerx)))
 
