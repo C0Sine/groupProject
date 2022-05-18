@@ -86,7 +86,7 @@ class Chunk(pygame.sprite.Sprite):
     def __repr__(self):
         return self.__str__()
 
-
+#class
 class IndoorMap(pygame.sprite.Sprite):
     def __init__(self):
         mapsize = 7
