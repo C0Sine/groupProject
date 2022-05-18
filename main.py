@@ -707,7 +707,7 @@ class Menu:
         displace = (self.itemSize / 2)
         # if its the main menu put game logo on top and move down options
         if self.isTitle:
-            self.output.blit(pygame.image.load("titlescreen.png"), (0, 0))
+            self.output.blit(pygame.transform.scale(pygame.image.load("titlescreen.png"), (800, 400)), (0, 0))
             displace = 400 + (self.itemSize / 2)
         for n in range(len(self.items)):
             text = self.font.render(self.items[n], 0, self.color)
