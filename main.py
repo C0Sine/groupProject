@@ -865,8 +865,8 @@ while True:
             elif item == 2:
                 if currentMenu == menu:
                     credits = Menu(
-                        ["Sam: very little", "Brandon:(what brandon did)", "Jude: Flashlight and Inventory Mechanics",
-                         "Rowen:(what rowen did)", "Back"], False, 40, (255, 255, 255))
+                        ["Sam: Came in Clutch", "Brandon: Smart Chunk Stuff", "Jude: Said Dumb Things and Drove People Crazy",
+                         "Rowen: Git Master", "Back"], False, 40, (255, 255, 255))
                     currentMenu = credits
                 elif currentMenu == respawnMenu:
                     pygame.quit()
@@ -1070,6 +1070,13 @@ while True:
             gaming = False
             respawnMenu = Menu(["RESPAWN", "Yes", "No"], False, 50, (255, 255, 255))
             currentMenu = respawnMenu
+
+            flashlight = Flashlight(1, 300)
+            battery = Battery()
+            vision.changeStrength(flashlight.getPower())
+            inventory = Inventory()
+            inventory.placeObject(8, flashlight)
+            inventory.placeObject(7, battery)
         if inv:
             inventory.blitInventory()
         if star.bears == 5:
