@@ -304,8 +304,10 @@ class Inventory:
 
         for i in range(1, 10):
 
-            pygame.draw.rect(surface, (100, 100, 100), (x, y, 75, 75))
-            pygame.draw.rect(surface, (50, 50, 50), (x + 7, y + 7, 61, 61))
+
+            surface.blit(pygame.transform.scale(pygame.image.load("item tile.png"), (75, 75)), (x, y))
+            #pygame.draw.rect(surface, (100, 100, 100), (x, y, 75, 75))
+            #pygame.draw.rect(surface, (50, 50, 50), (x + 7, y + 7, 61, 61))
 
             if self.items[i - 1].type == "flashlight":
                 surface.blit(self.items[i - 1].image, (x + 10, y + 12))
@@ -458,7 +460,8 @@ class Player(pygame.sprite.Sprite):
             (self.rect.height - self.image.get_height()) / 2)  # Changes image location to center hitbox
 
     def blitStatus(self):
-        pygame.draw.rect(surface, (100, 100, 100), (575, 60, 210, 20))
+        surface.blit(pygame.image.load("power bar.png"), (555, 40))
+        #pygame.draw.rect(surface, (100, 100, 100), (575, 60, 210, 20))
         pygame.draw.rect(surface, (0, 255, 0), (580, 65, flashlight.getBattery() / 2, 10))
         heart = pygame.transform.scale(pygame.image.load("playerHeart.png"), (40, 40))
         for i in range(self.health):
@@ -866,7 +869,7 @@ while True:
                 if currentMenu == menu:
                     credits = Menu(
                         ["Sam: Came in Clutch", "Brandon: Smart Chunk Stuff", "Jude: Said Dumb Things and Drove People Crazy",
-                         "Rowen: Git Master", "Back"], False, 40, (255, 255, 255))
+                         "Rowen: Git Master", "Back"], False, 30, (255, 255, 255))
                     currentMenu = credits
                 elif currentMenu == respawnMenu:
                     pygame.quit()
