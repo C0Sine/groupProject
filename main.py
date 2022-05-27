@@ -69,11 +69,12 @@ class Chunk(pygame.sprite.Sprite):
                 if self.area[i][j] == 'c':
                     pygame.draw.circle(tempsurf, (0, 0, 0), (j * 25 + 12.5, i * 25 + 12.5), 12.5)
 
-                elif self.area[i][j] == 'x':
-                    pygame.draw.rect(tempsurf, (0, 0, 0), (j * 25, i * 25, 25, 25))
-
                 elif self.area[i][j] == 'o':
                     pygame.draw.rect(tempsurf, (255, 255, 255), (j * 25, i * 25, 25, 25))
+
+                elif self.area[i][j] == 'x':
+                    surface.blit(pygame.image.load("wall2.png"), (j * 25, i * 25))
+
         tempsurf.set_colorkey((255, 255, 255))
         self.image = tempsurf
         self.mask = pygame.mask.from_surface(self.image)
